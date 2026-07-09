@@ -46,6 +46,7 @@ export default function App() {
       prompt,
       width,
       height,
+      enhance: !!type.enhance,
       filename: makeFilename(type.label, trimmed),
       seeds: Array.from({ length: VARIATION_COUNT }, (_, i) => seedBase + i * 1000),
     })
@@ -166,6 +167,7 @@ export default function App() {
                 seed={seed}
                 width={gen.width}
                 height={gen.height}
+                enhance={gen.enhance}
                 filename={gen.filename}
               />
             ))}

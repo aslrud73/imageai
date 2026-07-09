@@ -13,7 +13,7 @@
 const pollinations = {
   id: 'pollinations',
   name: 'Pollinations (무료)',
-  buildImageUrl({ prompt, width, height, seed, model = 'flux' }) {
+  buildImageUrl({ prompt, width, height, seed, model = 'flux', enhance = false }) {
     const encoded = encodeURIComponent(prompt)
     const params = new URLSearchParams({
       width: String(width),
@@ -24,6 +24,9 @@ const pollinations = {
       // 앱 식별용 referrer — 익명 사용 시 요청 허용량 확보에 도움
       referrer: 'classroom-image-maker',
     })
+    // enhance: LLM 이 프롬프트에 디테일을 보강해 결과물 품질을 크게 올린다.
+    // (라인아트·플랫 아이콘처럼 의도된 단순함이 필요한 유형에서는 끈다)
+    if (enhance) params.set('enhance', 'true')
     return `https://image.pollinations.ai/prompt/${encoded}?${params.toString()}`
   },
 }
@@ -47,19 +50,7 @@ export function listProviders() {
   return Object.values(PROVIDERS)
 }
 
-// 현재 활성 제공자로 이미지 URL 하나 생성 (개별 카드의 수정·업스케일에서 사용)
+// 현재 활성 제공자로 이미지 URL 생성 (카드의 생성·수정·업스케일에서 사용)
 export function buildImageUrl(opts) {
   return getProvider().buildImageUrl(opts)
-}
-
-// 여러 장의 변형(variation)을 만들기 위한 URL 배열 생성.
-// 서로 다른 seed 를 써서 교사가 미리보기 후 마음에 드는 것을 고를 수 있게 한다.
-export function buildVariations({ prompt, width, height, count, seedBase }) {
-  const provider = getProvider()
-  const urls = []
-  for (let i = 0; i < count; i++) {
-    const seed = seedBase + i * 1000
-    urls.push({ seed, url: provider.buildImageUrl({ prompt, width, height, seed }) })
-  }
-  return urls
 }

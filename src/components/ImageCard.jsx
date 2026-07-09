@@ -12,7 +12,7 @@ const MAX_DIM = 2048
 // 실패 시 자동 재시도 횟수 (무료 API 는 순간 과부하로 간헐 실패할 수 있음)
 const AUTO_RETRIES = 2
 
-export default function ImageCard({ prompt, seed, width, height, filename }) {
+export default function ImageCard({ prompt, seed, width, height, enhance, filename }) {
   const [status, setStatus] = useState('loading') // loading | loaded | retry-wait | error
   const [attempts, setAttempts] = useState(0)
   const [downloading, setDownloading] = useState(false)
@@ -28,10 +28,10 @@ export default function ImageCard({ prompt, seed, width, height, filename }) {
   const h = Math.round(height * scale)
   const fullPrompt = appliedEdit ? `${prompt}, ${appliedEdit}` : prompt
   const url = useMemo(() => {
-    const base = buildImageUrl({ prompt: fullPrompt, width: w, height: h, seed })
+    const base = buildImageUrl({ prompt: fullPrompt, width: w, height: h, seed, enhance })
     // 재시도 시 캐시를 우회해 새로 요청 (seed 가 같아 결과 이미지는 동일 구도)
     return attempts > 0 ? `${base}&r=${attempts}` : base
-  }, [fullPrompt, w, h, seed, attempts])
+  }, [fullPrompt, w, h, seed, enhance, attempts])
 
   // URL 이 바뀌면(수정/업스케일/재시도) 다시 로딩 상태로
   useEffect(() => {
