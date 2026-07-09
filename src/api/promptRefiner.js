@@ -9,9 +9,11 @@ const TIMEOUT_MS = 15000
 // 반환: { prompt, refined } — refined=false 면 변환 실패로 원문을 그대로 쓴다는 뜻
 export async function refinePrompt(description) {
   const instruction =
-    'Translate the following image description into ONE English image-generation prompt. ' +
-    'CRITICAL: keep EVERY element of the description — every subject, object, action, place, time of day and mood must appear in the prompt. ' +
-    'Then add concise visual quality details (lighting, composition, atmosphere, high detail). ' +
+    'Translate the following image description into ONE concise English image-generation prompt (under 60 words). ' +
+    'CRITICAL rules: (1) keep EVERY element of the description — every subject, object, action, place, time of day and mood must appear; ' +
+    '(2) be concrete and specific, no vague poetic filler; ' +
+    '(3) default to a photorealistic style unless the description asks for another style; ' +
+    '(4) end with: lighting and composition in a few words. ' +
     'Output ONLY the prompt text, no quotes, no explanations.\n\n' +
     `Description: ${description}`
 

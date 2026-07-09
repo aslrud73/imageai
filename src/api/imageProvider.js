@@ -14,7 +14,11 @@ const pollinations = {
   id: 'pollinations',
   name: 'Pollinations (무료)',
   buildImageUrl({ prompt, width, height, seed, model = 'flux', enhance = false }) {
-    const encoded = encodeURIComponent(prompt)
+    // 무료 티어는 스텝 수가 적어 디테일이 뭉개지기 쉬움 —
+    // 품질·해부학 보정 토큰을 항상 덧붙여 최대한 끌어올린다
+    const QUALITY_SUFFIX =
+      ', sharp focus, highly detailed, natural proportions, anatomically correct hands and faces, professional quality'
+    const encoded = encodeURIComponent(prompt + QUALITY_SUFFIX)
     const params = new URLSearchParams({
       width: String(width),
       height: String(height),
