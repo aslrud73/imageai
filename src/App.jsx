@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { loadData, saveData } from './store'
 import Icon from './components/Icons'
+import Landing from './screens/Landing'
 import Home from './screens/Home'
 import RecordForm from './screens/RecordForm'
 import Logs from './screens/Logs'
@@ -20,6 +21,7 @@ export default function App() {
   const [data, setData] = useState(loadData)
   const [tab, setTab] = useState('home')
   const [recording, setRecording] = useState(false)
+  const [started, setStarted] = useState(() => localStorage.getItem('maumgyeol_started') === '1')
 
   useEffect(() => {
     saveData(data)
@@ -28,6 +30,20 @@ export default function App() {
   // 모든 화면이 이 함수 하나로 데이터를 갱신한다
   function update(fn) {
     setData((prev) => fn(structuredClone(prev)))
+  }
+
+  // 첫 방문: 메인(온보딩) 페이지
+  if (!started) {
+    return (
+      <div className="app">
+        <Landing
+          onStart={() => {
+            localStorage.setItem('maumgyeol_started', '1')
+            setStarted(true)
+          }}
+        />
+      </div>
+    )
   }
 
   return (

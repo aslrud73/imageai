@@ -848,6 +848,97 @@ textarea {
   margin-top: 18px;
 }
 
+/* ── 메인(랜딩) 페이지 ─────────────────── */
+.landing {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 48px 26px calc(26px + env(safe-area-inset-bottom));
+}
+.landing-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.landing-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  background: var(--accent);
+  color: #fdf9f4;
+  box-shadow: 0 10px 26px rgba(156, 91, 67, 0.3);
+  margin-bottom: 18px;
+}
+.landing-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.landing-tag {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  color: var(--soft-ink);
+  line-height: 1.7;
+}
+.landing-points {
+  list-style: none;
+  padding: 0;
+  margin: 34px 0 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+.landing-points li {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 15px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+}
+.point-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+  flex-shrink: 0;
+}
+.landing-points strong {
+  display: block;
+  font-size: 0.93rem;
+  font-weight: 700;
+}
+.landing-points small {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 2px;
+}
+.landing-foot {
+  padding-top: 26px;
+}
+.landing-note {
+  text-align: center;
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 12px;
+}
+
 /* ── 하단 탭바 ────────────────────────── */
 .tabbar {
   position: fixed;
