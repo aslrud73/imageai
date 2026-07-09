@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { buildImageUrl } from '../api/imageProvider'
+import { refinePrompt } from '../api/promptRefiner'
 import { checkSafety } from '../data/presets'
 import Icon from './Icons'
 
@@ -18,7 +19,9 @@ export default function ImageCard({ prompt, seed, width, height, enhance, filena
   const [downloading, setDownloading] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editText, setEditText] = useState('')
-  const [appliedEdit, setAppliedEdit] = useState('')
+  const [editBusy, setEditBusy] = useState(false)
+  // { label: 사용자가 입력한 한국어, prompt: 영어로 변환된 보정 문구 }
+  const [appliedEdit, setAppliedEdit] = useState(null)
   const [editError, setEditError] = useState('')
   const [upscaled, setUpscaled] = useState(false)
 
@@ -26,7 +29,7 @@ export default function ImageCard({ prompt, seed, width, height, enhance, filena
   const scale = upscaled ? Math.min(2, MAX_DIM / Math.max(width, height)) : 1
   const w = Math.round(width * scale)
   const h = Math.round(height * scale)
-  const fullPrompt = appliedEdit ? `${prompt}, ${appliedEdit}` : prompt
+  const fullPrompt = appliedEdit ? `${prompt}, ${appliedEdit.prompt}` : prompt
   const url = useMemo(() => {
     const base = buildImageUrl({ prompt: fullPrompt, width: w, height: h, seed, enhance })
     // 재시도 시 캐시를 우회해 새로 요청 (seed 가 같아 결과 이미지는 동일 구도)
@@ -53,12 +56,13 @@ export default function ImageCard({ prompt, seed, width, height, enhance, filena
     setAttempts((a) => a + 1)
   }
 
-  function applyEdit(e) {
+  async function applyEdit(e) {
     e.preventDefault()
+    if (editBusy) return
     setEditError('')
     const t = editText.trim()
     if (!t) {
-      setAppliedEdit('')
+      setAppliedEdit(null)
       setEditOpen(false)
       return
     }
@@ -67,12 +71,16 @@ export default function ImageCard({ prompt, seed, width, height, enhance, filena
       setEditError(`"${safety.word}" 단어는 사용할 수 없습니다.`)
       return
     }
-    setAppliedEdit(t)
+    // 보정 문구도 영어로 변환해야 모델이 정확히 반영한다
+    setEditBusy(true)
+    const { prompt: refined } = await refinePrompt(t)
+    setEditBusy(false)
+    setAppliedEdit({ label: t, prompt: refined })
     setEditOpen(false)
   }
 
   function resetEdit() {
-    setAppliedEdit('')
+    setAppliedEdit(null)
     setEditText('')
     setEditError('')
     setEditOpen(false)
@@ -143,8 +151,8 @@ export default function ImageCard({ prompt, seed, width, height, enhance, filena
             placeholder="예: 배경을 밤하늘로, 더 밝게"
             autoFocus
           />
-          <button type="submit" className="edit-apply">
-            적용
+          <button type="submit" className="edit-apply" disabled={editBusy}>
+            {editBusy ? '변환 중…' : '적용'}
           </button>
           {appliedEdit && (
             <button type="button" className="edit-reset" onClick={resetEdit}>
@@ -154,7 +162,7 @@ export default function ImageCard({ prompt, seed, width, height, enhance, filena
         </form>
       )}
       {editError && <p className="edit-error">{editError}</p>}
-      {appliedEdit && !editOpen && <p className="edit-note">수정: {appliedEdit}</p>}
+      {appliedEdit && !editOpen && <p className="edit-note">수정: {appliedEdit.label}</p>}
 
       <div className="card-actions">
         <button

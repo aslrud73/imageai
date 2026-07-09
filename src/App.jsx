@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ASPECTS, getAspect, checkSafety } from './data/presets'
+import { refinePrompt } from './api/promptRefiner'
 import Icon from './components/Icons'
 import ImageCard from './components/ImageCard'
 
@@ -7,15 +8,18 @@ export default function App() {
   const [subject, setSubject] = useState('')
   const [aspectId, setAspectId] = useState('1:1')
   const [highRes, setHighRes] = useState(false)
+  const [busy, setBusy] = useState(false) // 프롬프트 변환 중
+  const [genCount, setGenCount] = useState(0)
   // 생성 시점의 스냅샷: 이후 옵션을 바꿔도 이미 생성된 카드는 영향받지 않는다.
-  const [gen, setGen] = useState(null) // { prompt, width, height, seed, filename }
+  const [gen, setGen] = useState(null) // { prompt, enhance, width, height, seed, filename }
   const [error, setError] = useState('')
 
   const aspect = useMemo(() => getAspect(aspectId), [aspectId])
   const [width, height] = highRes ? aspect.high : aspect.standard
 
-  function handleGenerate(e) {
+  async function handleGenerate(e) {
     e?.preventDefault()
+    if (busy) return
     setError('')
     const trimmed = subject.trim()
     if (!trimmed) {
@@ -27,11 +31,18 @@ export default function App() {
       setError(`부적절할 수 있는 단어("${safety.word}")가 포함되어 생성을 막았습니다.`)
       return
     }
-    // 입력한 설명을 그대로 모델에 전달한다 (스타일 강제 없음).
-    // seed 는 입력값 기반으로 만들어 같은 입력이면 재현되도록 한다.
-    const seed = (hashString(trimmed) % 100000) + 1
+    // 한국어 설명 → 영어 프롬프트 변환 (모든 요소 보존 + 품질 디테일 추가).
+    // 변환에 실패하면 원문을 그대로 쓰되 이미지 API 의 enhance 로 보완한다.
+    setBusy(true)
+    const { prompt, refined } = await refinePrompt(trimmed)
+    setBusy(false)
+    // seed 는 입력값 기반 + 생성 횟수만큼 이동: 같은 입력이라도
+    // 버튼을 다시 누르면 다른 그림이 나온다.
+    const seed = ((hashString(trimmed) % 100000) + 1) + genCount * 7919
+    setGenCount((c) => c + 1)
     setGen({
-      prompt: trimmed,
+      prompt,
+      enhance: !refined,
       width,
       height,
       seed,
@@ -102,11 +113,11 @@ export default function App() {
         {error && <p className="error">{error}</p>}
 
         <div className="actions">
-          <button type="submit" className="btn-primary">
-            <Icon name="sparkles" size={18} /> 이미지 생성
+          <button type="submit" className="btn-primary" disabled={busy}>
+            <Icon name="sparkles" size={18} /> {busy ? '프롬프트 다듬는 중…' : '이미지 생성'}
           </button>
           {gen && (
-            <button type="button" className="btn-ghost" onClick={reshuffle}>
+            <button type="button" className="btn-ghost" onClick={reshuffle} disabled={busy}>
               <Icon name="refresh" size={16} /> 다른 그림
             </button>
           )}
