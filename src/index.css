@@ -332,7 +332,8 @@ body {
 }
 .result-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 420px));
+  justify-content: center;
   gap: 18px;
 }
 .image-card {
@@ -395,6 +396,33 @@ body {
   font-size: 0.85rem;
   text-align: center;
   padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.img-error p {
+  margin: 0;
+}
+.retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--grad);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 800;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transition: transform 0.1s, filter 0.16s;
+}
+.retry-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
 }
 .badges {
   position: absolute;

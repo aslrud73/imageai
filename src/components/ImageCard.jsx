@@ -9,8 +9,12 @@ const MAX_DIM = 2048
 // 개별 생성 이미지 카드: 로딩 표시 + 수정(프롬프트 보정) + 업스케일(2×) + 다운로드.
 // 같은 seed 를 유지한 채 프롬프트/해상도만 바꿔 재요청하므로
 // 구도를 크게 잃지 않으면서 이미지를 다듬을 수 있다.
+// 실패 시 자동 재시도 횟수 (무료 API 는 순간 과부하로 간헐 실패할 수 있음)
+const AUTO_RETRIES = 2
+
 export default function ImageCard({ prompt, seed, width, height, filename }) {
-  const [status, setStatus] = useState('loading') // loading | loaded | error
+  const [status, setStatus] = useState('loading') // loading | loaded | retry-wait | error
+  const [attempts, setAttempts] = useState(0)
   const [downloading, setDownloading] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editText, setEditText] = useState('')
@@ -23,15 +27,31 @@ export default function ImageCard({ prompt, seed, width, height, filename }) {
   const w = Math.round(width * scale)
   const h = Math.round(height * scale)
   const fullPrompt = appliedEdit ? `${prompt}, ${appliedEdit}` : prompt
-  const url = useMemo(
-    () => buildImageUrl({ prompt: fullPrompt, width: w, height: h, seed }),
-    [fullPrompt, w, h, seed],
-  )
+  const url = useMemo(() => {
+    const base = buildImageUrl({ prompt: fullPrompt, width: w, height: h, seed })
+    // 재시도 시 캐시를 우회해 새로 요청 (seed 가 같아 결과 이미지는 동일 구도)
+    return attempts > 0 ? `${base}&r=${attempts}` : base
+  }, [fullPrompt, w, h, seed, attempts])
 
-  // URL 이 바뀌면(수정/업스케일) 다시 로딩 상태로
+  // URL 이 바뀌면(수정/업스케일/재시도) 다시 로딩 상태로
   useEffect(() => {
     setStatus('loading')
   }, [url])
+
+  // 실패 → 잠시 기다렸다가 자동 재시도 (점점 길게)
+  useEffect(() => {
+    if (status !== 'retry-wait') return
+    const t = setTimeout(() => setAttempts((a) => a + 1), 3000 * (attempts + 1))
+    return () => clearTimeout(t)
+  }, [status, attempts])
+
+  function handleImgError() {
+    setStatus(attempts < AUTO_RETRIES ? 'retry-wait' : 'error')
+  }
+
+  function manualRetry() {
+    setAttempts((a) => a + 1)
+  }
 
   function applyEdit(e) {
     e.preventDefault()
@@ -83,17 +103,22 @@ export default function ImageCard({ prompt, seed, width, height, filename }) {
   return (
     <div className="image-card">
       <div className="image-frame">
-        {status === 'loading' && (
+        {(status === 'loading' || status === 'retry-wait') && (
           <div className="loading-box" aria-label="생성 중">
             <span className="spinner-ring" />
-            <span>그리는 중…</span>
+            <span>{status === 'retry-wait' ? '잠시 후 다시 시도…' : '그리는 중…'}</span>
           </div>
         )}
         {status === 'error' && (
           <div className="img-error">
-            불러오기 실패
-            <br />
-            다시 시도해 주세요
+            <p>
+              이미지 생성에 실패했어요.
+              <br />
+              무료 서버가 붐비는 중일 수 있어요.
+            </p>
+            <button type="button" className="retry-btn" onClick={manualRetry}>
+              <Icon name="refresh" size={14} /> 다시 시도
+            </button>
           </div>
         )}
         <img
@@ -101,7 +126,7 @@ export default function ImageCard({ prompt, seed, width, height, filename }) {
           alt="생성된 이미지"
           className={status === 'loaded' ? 'visible' : 'hidden'}
           onLoad={() => setStatus('loaded')}
-          onError={() => setStatus('error')}
+          onError={handleImgError}
         />
         <div className="badges">
           {upscaled && <span className="badge">2× {w}×{h}</span>}

@@ -21,6 +21,8 @@ const pollinations = {
       seed: String(seed),
       model,
       nologo: 'true',
+      // 앱 식별용 referrer — 익명 사용 시 요청 허용량 확보에 도움
+      referrer: 'classroom-image-maker',
     })
     return `https://image.pollinations.ai/prompt/${encoded}?${params.toString()}`
   },

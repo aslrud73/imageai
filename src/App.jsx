@@ -3,7 +3,9 @@ import { TYPES, ASPECTS, getType, getAspect, checkSafety } from './data/presets'
 import Icon from './components/Icons'
 import ImageCard from './components/ImageCard'
 
-const VARIATION_COUNT = 3
+// 무료 익명 API는 동시 요청 제한이 있어 한 번에 1장만 생성한다.
+// (여러 장을 동시에 요청하면 일부가 실패함) — "다시 생성"으로 다른 그림을 볼 수 있다.
+const VARIATION_COUNT = 1
 
 export default function App() {
   const [typeId, setTypeId] = useState(TYPES[0].id)
@@ -139,11 +141,11 @@ export default function App() {
 
         <div className="actions">
           <button type="submit" className="btn-primary">
-            <Icon name="sparkles" size={18} /> 이미지 생성 ({VARIATION_COUNT}장)
+            <Icon name="sparkles" size={18} /> 이미지 생성
           </button>
           {gen && (
             <button type="button" className="btn-ghost" onClick={reshuffle}>
-              <Icon name="refresh" size={16} /> 다시 생성
+              <Icon name="refresh" size={16} /> 다른 그림
             </button>
           )}
         </div>
@@ -154,7 +156,7 @@ export default function App() {
         <section className="results">
           <div className="results-head">
             <h2>미리보기</h2>
-            <p>마음에 드는 이미지를 수정·업스케일하거나 저장하세요.</p>
+            <p>마음에 들면 저장하고, 아니면 "다른 그림"으로 새로 만들어 보세요.</p>
           </div>
           <div className="result-grid">
             {gen.seeds.map((seed) => (
