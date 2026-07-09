@@ -7,6 +7,8 @@ import { EMOTION_LABELS, SHARE_FIELDS, fmtDate, daysAgo } from '../store'
 export default function Logs({ data, update, onRecord }) {
   const [openId, setOpenId] = useState(null)
   const [mode, setMode] = useState(null) // 'reflect' | 'share'
+  const [resolveInput, setResolveInput] = useState(null) // 나중에 "풀렸어요" 표시 중인 기록 id
+  const [resolveHow, setResolveHow] = useState('')
 
   const log = data.logs.find((l) => l.id === openId)
 
@@ -83,6 +85,43 @@ export default function Logs({ data, update, onRecord }) {
               <p>
                 <span className="k">해결 여부</span> {l.resolved ? '어느 정도 풀렸어요' : '아직 풀리지 않았어요'}
               </p>
+              {l.resolved && l.resolvedHow && (
+                <p className="recovered-line">
+                  <span className="k"><Icon name="sprout" size={11} /> 회복 기록</span> {l.resolvedHow}
+                </p>
+              )}
+              {!l.resolved &&
+                (resolveInput === l.id ? (
+                  <div className="resolve-form">
+                    <input
+                      type="text"
+                      className="etc-input recovered"
+                      value={resolveHow}
+                      onChange={(e) => setResolveHow(e.target.value)}
+                      placeholder="어떻게 풀렸나요? (선택) — 예: 산책하며 이야기했다"
+                      autoFocus
+                    />
+                    <button
+                      className="small-btn accent"
+                      onClick={() => {
+                        update((d) => {
+                          const t = d.logs.find((x) => x.id === l.id)
+                          t.resolved = true
+                          t.resolvedHow = resolveHow.trim()
+                          return d
+                        })
+                        setResolveInput(null)
+                        setResolveHow('')
+                      }}
+                    >
+                      저장
+                    </button>
+                  </div>
+                ) : (
+                  <button className="resolve-later" onClick={() => setResolveInput(l.id)}>
+                    <Icon name="sprout" size={13} /> 이제 풀렸어요
+                  </button>
+                ))}
               {l.memo && (
                 <p className="memo">
                   <span className="k"><Icon name="lock" size={11} /> 남기고 싶은 말</span> {l.memo}

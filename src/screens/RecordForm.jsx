@@ -14,6 +14,7 @@ export default function RecordForm({ update, onDone, onCancel }) {
   const [partnerEtc, setPartnerEtc] = useState('')
   const [memo, setMemo] = useState('')
   const [resolved, setResolved] = useState(false)
+  const [resolvedHow, setResolvedHow] = useState('')
   const [error, setError] = useState('')
 
   function toggle(list, setList, v) {
@@ -58,6 +59,7 @@ export default function RecordForm({ update, onDone, onCancel }) {
         partnerReactions: resolveEtc(partnerReactions, partnerEtc),
         memo: memo.trim(),
         resolved,
+        resolvedHow: resolved ? resolvedHow.trim() : '',
         reflection: null,
         share: null,
       })
@@ -119,6 +121,15 @@ export default function RecordForm({ update, onDone, onCancel }) {
             </button>
           ))}
         </div>
+        {emotion === 5 && (
+          <div className="cooldown-note">
+            <Icon name="moon" size={15} />
+            <p>
+              지금은 마음이 많이 격한 상태예요. 잠깐 멈춰 세 번 깊게 숨을 쉬어 보세요.
+              기록은 어디 가지 않아요 — 조금 가라앉은 뒤에 써도 늦지 않아요.
+            </p>
+          </div>
+        )}
       </section>
 
       <section className="field">
@@ -183,6 +194,15 @@ export default function RecordForm({ update, onDone, onCancel }) {
         <input type="checkbox" checked={resolved} onChange={(e) => setResolved(e.target.checked)} />
         <span>이 일은 어느 정도 풀렸어요</span>
       </label>
+      {resolved && (
+        <input
+          type="text"
+          className="etc-input recovered"
+          value={resolvedHow}
+          onChange={(e) => setResolvedHow(e.target.value)}
+          placeholder="어떻게 풀렸나요? (선택) — 예: 산책하며 이야기했다"
+        />
+      )}
 
       <p className="safety-line">
         <Icon name="alert" size={13} /> 폭력·협박 등 안전이 걱정되는 상황이라면 기록보다 안전 확보가

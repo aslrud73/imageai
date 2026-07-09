@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import Icon from '../components/Icons'
-import { todayKey, fmtDate, daysAgo } from '../store'
+import { todayKey, localDateKey, fmtDate, daysAgo, WEATHERS, getWeather } from '../store'
 
 export default function Home({ data, update, onRecord, goTab }) {
   const today = new Date()
@@ -18,6 +19,29 @@ export default function Home({ data, update, onRecord, goTab }) {
       return d
     })
   }
+
+  // ── 매일 한 줄 체크인 ──────────────────
+  const todayCheckin = (data.checkins || []).find((c) => c.date === tk)
+  const [editingCheckin, setEditingCheckin] = useState(false)
+  const [selWeather, setSelWeather] = useState(todayCheckin?.weather || '')
+  const [checkinNote, setCheckinNote] = useState(todayCheckin?.note || '')
+
+  function saveCheckin() {
+    if (!selWeather) return
+    update((d) => {
+      d.checkins = (d.checkins || []).filter((c) => c.date !== tk)
+      d.checkins.push({ date: tk, weather: selWeather, note: checkinNote.trim() })
+      return d
+    })
+    setEditingCheckin(false)
+  }
+
+  // 최근 7일 날씨 스트립 (오늘 포함)
+  const recentDays = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    return localDateKey(d)
+  })
 
   return (
     <div className="page">
@@ -40,6 +64,71 @@ export default function Home({ data, update, onRecord, goTab }) {
       <p className="privacy-note">
         <Icon name="lock" size={14} /> 기록은 기본 비공개예요. 공유는 내가 선택할 때만 이루어져요.
       </p>
+
+      <section className="section">
+        <h2 className="section-title">
+          <Icon name="cloudSun" size={16} /> 오늘 우리 사이 날씨
+        </h2>
+        <div className="checkin-card">
+          {todayCheckin && !editingCheckin ? (
+            <div className="checkin-done">
+              <span className="weather-badge">
+                <Icon name={getWeather(todayCheckin.weather)?.icon || 'cloud'} size={22} />
+              </span>
+              <div className="checkin-text">
+                <strong>{getWeather(todayCheckin.weather)?.label}</strong>
+                {todayCheckin.note && <small>{todayCheckin.note}</small>}
+              </div>
+              <button
+                className="small-btn"
+                onClick={() => {
+                  setSelWeather(todayCheckin.weather)
+                  setCheckinNote(todayCheckin.note)
+                  setEditingCheckin(true)
+                }}
+              >
+                수정
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="weather-row">
+                {WEATHERS.map((w) => (
+                  <button
+                    key={w.id}
+                    className={`weather-btn ${selWeather === w.id ? 'on' : ''}`}
+                    onClick={() => setSelWeather(w.id)}
+                  >
+                    <Icon name={w.icon} size={21} />
+                    <span>{w.label}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="checkin-input-row">
+                <input
+                  type="text"
+                  value={checkinNote}
+                  onChange={(e) => setCheckinNote(e.target.value)}
+                  placeholder="한 줄 남기기 (선택)"
+                />
+                <button className="small-btn accent" disabled={!selWeather} onClick={saveCheckin}>
+                  저장
+                </button>
+              </div>
+            </>
+          )}
+          <div className="weather-strip">
+            {recentDays.map((dk) => {
+              const c = (data.checkins || []).find((x) => x.date === dk)
+              return (
+                <span key={dk} className={`weather-day ${dk === tk ? 'today' : ''}`}>
+                  {c ? <Icon name={getWeather(c.weather)?.icon || 'cloud'} size={15} /> : <span className="weather-empty" />}
+                </span>
+              )
+            })}
+          </div>
+        </div>
+      </section>
 
       {pendingReflections.length > 0 && (
         <section className="section">

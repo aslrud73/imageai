@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { loadData, saveData } from './store'
+import { loadData, saveData, getPinHash } from './store'
 import Icon from './components/Icons'
+import PinLock from './components/PinLock'
 import Landing from './screens/Landing'
 import Home from './screens/Home'
 import RecordForm from './screens/RecordForm'
@@ -22,6 +23,10 @@ export default function App() {
   const [tab, setTab] = useState('home')
   const [recording, setRecording] = useState(false)
   const [started, setStarted] = useState(() => localStorage.getItem('maumgyeol_started') === '1')
+  // PIN이 설정돼 있으면 세션마다 잠금 화면부터 (탭 전환은 유지, 앱을 새로 열면 다시 잠김)
+  const [locked, setLocked] = useState(
+    () => !!getPinHash() && sessionStorage.getItem('maumgyeol_unlocked') !== '1',
+  )
 
   useEffect(() => {
     saveData(data)
@@ -30,6 +35,20 @@ export default function App() {
   // 모든 화면이 이 함수 하나로 데이터를 갱신한다
   function update(fn) {
     setData((prev) => fn(structuredClone(prev)))
+  }
+
+  // 잠금이 최우선 (개인 기록 보호)
+  if (locked) {
+    return (
+      <div className="app">
+        <PinLock
+          onUnlock={() => {
+            sessionStorage.setItem('maumgyeol_unlocked', '1')
+            setLocked(false)
+          }}
+        />
+      </div>
+    )
   }
 
   // 첫 방문: 메인(온보딩) 페이지

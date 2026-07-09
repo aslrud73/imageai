@@ -5,11 +5,15 @@ const KEY = 'maumgyeol_v1'
 export function loadData() {
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      const d = JSON.parse(raw)
+      // 구버전 데이터 마이그레이션: 없는 필드는 기본값으로
+      return { logs: d.logs || [], agreements: d.agreements || [], checkins: d.checkins || [] }
+    }
   } catch {
     /* 손상된 데이터는 초기화 */
   }
-  return { logs: [], agreements: [] }
+  return { logs: [], agreements: [], checkins: [] }
 }
 
 export function saveData(data) {
@@ -81,6 +85,63 @@ export function weekDates() {
 }
 
 export const DAY_NAMES = ['월', '화', '수', '목', '금', '토', '일']
+
+// ── 매일 한 줄 체크인: 오늘 우리 사이 날씨 ─────────────
+export const WEATHERS = [
+  { id: 'sunny', label: '맑음', icon: 'sun' },
+  { id: 'partly', label: '구름 조금', icon: 'cloudSun' },
+  { id: 'cloudy', label: '흐림', icon: 'cloud' },
+  { id: 'rain', label: '비', icon: 'rain' },
+  { id: 'storm', label: '폭풍', icon: 'storm' },
+]
+
+export function getWeather(id) {
+  return WEATHERS.find((w) => w.id === id)
+}
+
+// ── 기록 잠금(PIN): SHA-256 해시로 저장 ──────────────
+const PIN_KEY = 'maumgyeol_pin'
+
+export async function hashPin(pin) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`maumgyeol:${pin}`))
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
+export function getPinHash() {
+  return localStorage.getItem(PIN_KEY)
+}
+
+export async function setPin(pin) {
+  localStorage.setItem(PIN_KEY, await hashPin(pin))
+}
+
+export function removePin() {
+  localStorage.removeItem(PIN_KEY)
+}
+
+// ── 백업 / 복원 ─────────────────────────────
+export function exportBackup(data) {
+  return JSON.stringify(
+    { app: 'maumgyeol', version: 1, exportedAt: new Date().toISOString(), data },
+    null,
+    2,
+  )
+}
+
+// 백업 파일 검증: 형식이 맞으면 데이터를, 아니면 null 반환
+export function parseBackup(text) {
+  try {
+    const obj = JSON.parse(text)
+    if (obj.app !== 'maumgyeol' || !obj.data) return null
+    const { logs, agreements, checkins } = obj.data
+    if (!Array.isArray(logs) || !Array.isArray(agreements)) return null
+    return { logs, agreements, checkins: Array.isArray(checkins) ? checkins : [] }
+  } catch {
+    return null
+  }
+}
 
 export function daysAgo(iso) {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)

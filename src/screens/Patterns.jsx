@@ -1,11 +1,22 @@
+import { useState } from 'react'
 import Icon from '../components/Icons'
 import { timeBucket, todayKey, weekDates } from '../store'
+
+const PERIODS = [
+  { days: 7, label: '7일' },
+  { days: 30, label: '30일' },
+  { days: 0, label: '전체' },
+]
 
 // 우리 패턴: 공유에 동의한 데이터만 사용한다 (기획서 9장).
 // 비공개 메모·회고 원문은 절대 집계에 넣지 않는다.
 export default function Patterns({ data }) {
+  const [period, setPeriod] = useState(7)
   const shared = data.logs.filter((l) => l.share)
-  const recent = shared.filter((l) => Date.now() - new Date(l.createdAt).getTime() < 7 * 86400000)
+  const recent = period
+    ? shared.filter((l) => Date.now() - new Date(l.createdAt).getTime() < period * 86400000)
+    : shared
+  const periodLabel = period ? `최근 ${period}일` : '전체 기간'
 
   // 주제 빈도 (공유 동의된 것만)
   const topicCount = {}
@@ -53,11 +64,23 @@ export default function Patterns({ data }) {
         <Icon name="share" size={13} /> 공유에 동의한 기록만으로 만들어져요.
       </p>
 
+      <div className="period-tabs">
+        {PERIODS.map((p) => (
+          <button
+            key={p.days}
+            className={`period-tab ${period === p.days ? 'on' : ''}`}
+            onClick={() => setPeriod(p.days)}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
       {recent.length === 0 ? (
         <div className="empty-state">
           <Icon name="chart" size={36} strokeWidth={1.4} />
           <p>
-            최근 7일간 공유된 기록이 없어요.
+            {periodLabel} 공유된 기록이 없어요.
             <br />
             회고를 마친 기록에서 공유할 항목을 골라 보세요.
           </p>
@@ -117,6 +140,24 @@ export default function Patterns({ data }) {
               {requests.slice(0, 3).map((l) => (
                 <p key={l.id} className="request-line">"{l.reflection.request}"</p>
               ))}
+            </div>
+          )}
+
+          {recent.some((l) => l.resolved) && (
+            <div className="stat-card recovery">
+              <h3>
+                <Icon name="sprout" size={14} /> 우리는 이렇게 풀어요
+              </h3>
+              <p className="recovery-count">
+                공유된 기록 {recent.length}건 중 <strong>{recent.filter((l) => l.resolved).length}건</strong>이
+                풀렸어요.
+              </p>
+              {recent
+                .filter((l) => l.resolved && l.resolvedHow)
+                .slice(0, 3)
+                .map((l) => (
+                  <p key={l.id} className="request-line">"{l.resolvedHow}"</p>
+                ))}
             </div>
           )}
 
