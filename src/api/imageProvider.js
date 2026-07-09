@@ -45,6 +45,11 @@ export function listProviders() {
   return Object.values(PROVIDERS)
 }
 
+// 현재 활성 제공자로 이미지 URL 하나 생성 (개별 카드의 수정·업스케일에서 사용)
+export function buildImageUrl(opts) {
+  return getProvider().buildImageUrl(opts)
+}
+
 // 여러 장의 변형(variation)을 만들기 위한 URL 배열 생성.
 // 서로 다른 seed 를 써서 교사가 미리보기 후 마음에 드는 것을 고를 수 있게 한다.
 export function buildVariations({ prompt, width, height, count, seedBase }) {

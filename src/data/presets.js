@@ -6,7 +6,7 @@ export const TYPES = [
   {
     id: 'flashcard',
     label: '그림카드',
-    emoji: '🃏',
+    icon: 'image',
     desc: '흰 배경, 사물 하나, 또렷한 외곽선. 낱말·플래시카드용',
     placeholder: '예: 사과, 강아지, 소방차',
     defaultAspect: '1:1',
@@ -16,7 +16,7 @@ export const TYPES = [
   {
     id: 'story',
     label: '이야기 삽화',
-    emoji: '📖',
+    icon: 'book',
     desc: '동화책 그림체, 따뜻한 색감. 이야기·동화 자료용',
     placeholder: '예: 숲속에서 토끼가 당근을 먹는 장면',
     defaultAspect: '4:3',
@@ -26,7 +26,7 @@ export const TYPES = [
   {
     id: 'icon',
     label: '아이콘',
-    emoji: '⬛',
+    icon: 'grid',
     desc: '플랫·심플한 아이콘. 학습지·시간표·UI용',
     placeholder: '예: 연필, 시계, 우산',
     defaultAspect: '1:1',
@@ -36,7 +36,7 @@ export const TYPES = [
   {
     id: 'coloring',
     label: '색칠공부',
-    emoji: '🖍️',
+    icon: 'pencil',
     desc: '흑백 라인아트. 인쇄해서 색칠하기용',
     placeholder: '예: 공룡, 꽃밭, 자동차',
     defaultAspect: 'A4',
@@ -46,7 +46,7 @@ export const TYPES = [
   {
     id: 'poster',
     label: '게시물/포스터',
-    emoji: '📢',
+    icon: 'megaphone',
     desc: '세로형, 여백 확보. 교실 게시·안내문용',
     placeholder: '예: 손 씻기, 교실 규칙, 계절 안내',
     defaultAspect: '3:4',

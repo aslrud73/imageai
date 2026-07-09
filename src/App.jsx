@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { TYPES, ASPECTS, getType, getAspect, checkSafety } from './data/presets'
-import { buildVariations } from './api/imageProvider'
+import Icon from './components/Icons'
 import ImageCard from './components/ImageCard'
 
 const VARIATION_COUNT = 3
@@ -10,7 +10,8 @@ export default function App() {
   const [subject, setSubject] = useState('')
   const [aspectId, setAspectId] = useState(TYPES[0].defaultAspect)
   const [highRes, setHighRes] = useState(false)
-  const [variations, setVariations] = useState([])
+  // 생성 시점의 스냅샷: 이후 옵션을 바꿔도 이미 생성된 카드는 영향받지 않는다.
+  const [gen, setGen] = useState(null) // { prompt, width, height, seeds, filename }
   const [error, setError] = useState('')
 
   const type = useMemo(() => getType(typeId), [typeId])
@@ -39,23 +40,30 @@ export default function App() {
     const prompt = type.buildPrompt(trimmed)
     // seedBase 는 입력값 기반으로 만들어 같은 입력이면 재현되도록 한다.
     const seedBase = (hashString(prompt) % 100000) + 1
-    const urls = buildVariations({ prompt, width, height, count: VARIATION_COUNT, seedBase })
-    setVariations(urls.map((v) => ({ ...v, id: `${v.seed}-${width}x${height}` })))
+    setGen({
+      prompt,
+      width,
+      height,
+      filename: makeFilename(type.label, trimmed),
+      seeds: Array.from({ length: VARIATION_COUNT }, (_, i) => seedBase + i * 1000),
+    })
   }
 
   function reshuffle() {
-    if (!variations.length) return
-    const bump = Math.floor(width * height) % 7919 // 결정적 재생성(랜덤 대신)
-    const prompt = type.buildPrompt(subject.trim())
-    const seedBase = (hashString(prompt) % 100000) + 1 + (variations[0].seed % 500) + bump
-    const urls = buildVariations({ prompt, width, height, count: VARIATION_COUNT, seedBase })
-    setVariations(urls.map((v) => ({ ...v, id: `${v.seed}-${width}x${height}` })))
+    if (!gen) return
+    // 결정적 재생성(랜덤 대신): seed 를 일정 간격으로 이동
+    setGen({ ...gen, seeds: gen.seeds.map((s) => s + 7919) })
   }
 
   return (
     <div className="app">
       <header className="header">
-        <h1>🎨 우리반 이미지 메이커</h1>
+        <h1>
+          <span className="logo">
+            <Icon name="palette" size={26} strokeWidth={1.6} />
+          </span>
+          우리반 이미지 메이커
+        </h1>
         <p className="tagline">유형과 사이즈를 고르면 수업용 이미지를 만들어 드려요.</p>
       </header>
 
@@ -71,9 +79,16 @@ export default function App() {
                 className={`type-card ${t.id === typeId ? 'selected' : ''}`}
                 onClick={() => selectType(t.id)}
               >
-                <span className="type-emoji">{t.emoji}</span>
+                <span className="type-icon">
+                  <Icon name={t.icon} size={22} />
+                </span>
                 <span className="type-label">{t.label}</span>
                 <span className="type-desc">{t.desc}</span>
+                {t.id === typeId && (
+                  <span className="type-check">
+                    <Icon name="check" size={13} strokeWidth={2.6} />
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -93,7 +108,8 @@ export default function App() {
             onChange={(e) => setSubject(e.target.value)}
           />
           <p className="hint">
-            ⚠️ 학생 이름·사진·개인정보는 입력하지 마세요. 주제(사물·장면)만 적어 주세요.
+            <Icon name="alert" size={14} /> 학생 이름·사진·개인정보는 입력하지 마세요. 주제(사물·장면)만
+            적어 주세요.
           </p>
         </section>
 
@@ -123,23 +139,33 @@ export default function App() {
 
         <div className="actions">
           <button type="submit" className="btn-primary">
-            ✨ 이미지 생성 ({VARIATION_COUNT}장)
+            <Icon name="sparkles" size={18} /> 이미지 생성 ({VARIATION_COUNT}장)
           </button>
-          {variations.length > 0 && (
+          {gen && (
             <button type="button" className="btn-ghost" onClick={reshuffle}>
-              🔄 다시 생성
+              <Icon name="refresh" size={16} /> 다시 생성
             </button>
           )}
         </div>
       </form>
 
-      {/* 결과: 미리보기 → 선택 → 저장 */}
-      {variations.length > 0 && (
+      {/* 결과: 미리보기 → 수정/업스케일 → 저장 */}
+      {gen && (
         <section className="results">
-          <h2>미리보기 · 마음에 드는 것을 저장하세요</h2>
+          <div className="results-head">
+            <h2>미리보기</h2>
+            <p>마음에 드는 이미지를 수정·업스케일하거나 저장하세요.</p>
+          </div>
           <div className="result-grid">
-            {variations.map((v) => (
-              <ImageCard key={v.id} url={v.url} filename={makeFilename(type.label, subject)} />
+            {gen.seeds.map((seed) => (
+              <ImageCard
+                key={`${seed}-${gen.width}x${gen.height}-${gen.prompt}`}
+                prompt={gen.prompt}
+                seed={seed}
+                width={gen.width}
+                height={gen.height}
+                filename={gen.filename}
+              />
             ))}
           </div>
         </section>
