@@ -1,37 +1,25 @@
 import { useMemo, useState } from 'react'
-import { TYPES, ASPECTS, getType, getAspect, checkSafety } from './data/presets'
+import { ASPECTS, getAspect, checkSafety } from './data/presets'
 import Icon from './components/Icons'
 import ImageCard from './components/ImageCard'
 
-// 무료 익명 API는 동시 요청 제한이 있어 한 번에 1장만 생성한다.
-// (여러 장을 동시에 요청하면 일부가 실패함) — "다시 생성"으로 다른 그림을 볼 수 있다.
-const VARIATION_COUNT = 1
-
 export default function App() {
-  const [typeId, setTypeId] = useState(TYPES[0].id)
   const [subject, setSubject] = useState('')
-  const [aspectId, setAspectId] = useState(TYPES[0].defaultAspect)
+  const [aspectId, setAspectId] = useState('1:1')
   const [highRes, setHighRes] = useState(false)
   // 생성 시점의 스냅샷: 이후 옵션을 바꿔도 이미 생성된 카드는 영향받지 않는다.
-  const [gen, setGen] = useState(null) // { prompt, width, height, seeds, filename }
+  const [gen, setGen] = useState(null) // { prompt, width, height, seed, filename }
   const [error, setError] = useState('')
 
-  const type = useMemo(() => getType(typeId), [typeId])
   const aspect = useMemo(() => getAspect(aspectId), [aspectId])
   const [width, height] = highRes ? aspect.high : aspect.standard
-
-  function selectType(id) {
-    setTypeId(id)
-    // 유형을 바꾸면 그 유형의 추천 사이즈로 자동 전환
-    setAspectId(getType(id).defaultAspect)
-  }
 
   function handleGenerate(e) {
     e?.preventDefault()
     setError('')
     const trimmed = subject.trim()
     if (!trimmed) {
-      setError('주제를 입력해 주세요.')
+      setError('만들고 싶은 이미지를 설명해 주세요.')
       return
     }
     const safety = checkSafety(trimmed)
@@ -39,23 +27,22 @@ export default function App() {
       setError(`부적절할 수 있는 단어("${safety.word}")가 포함되어 생성을 막았습니다.`)
       return
     }
-    const prompt = type.buildPrompt(trimmed)
-    // seedBase 는 입력값 기반으로 만들어 같은 입력이면 재현되도록 한다.
-    const seedBase = (hashString(prompt) % 100000) + 1
+    // 입력한 설명을 그대로 모델에 전달한다 (스타일 강제 없음).
+    // seed 는 입력값 기반으로 만들어 같은 입력이면 재현되도록 한다.
+    const seed = (hashString(trimmed) % 100000) + 1
     setGen({
-      prompt,
+      prompt: trimmed,
       width,
       height,
-      enhance: !!type.enhance,
-      filename: makeFilename(type.label, trimmed),
-      seeds: Array.from({ length: VARIATION_COUNT }, (_, i) => seedBase + i * 1000),
+      seed,
+      filename: makeFilename(trimmed),
     })
   }
 
   function reshuffle() {
     if (!gen) return
     // 결정적 재생성(랜덤 대신): seed 를 일정 간격으로 이동
-    setGen({ ...gen, seeds: gen.seeds.map((s) => s + 7919) })
+    setGen({ ...gen, seed: gen.seed + 7919 })
   }
 
   return (
@@ -67,58 +54,32 @@ export default function App() {
           </span>
           우리반 이미지 메이커
         </h1>
-        <p className="tagline">유형과 사이즈를 고르면 수업용 이미지를 만들어 드려요.</p>
+        <p className="tagline">만들고 싶은 이미지를 설명하고 사이즈만 고르세요.</p>
       </header>
 
       <form className="panel" onSubmit={handleGenerate}>
-        {/* 1. 유형 선택 */}
-        <section className="field">
-          <label className="field-label">1. 유형 선택</label>
-          <div className="type-grid">
-            {TYPES.map((t) => (
-              <button
-                type="button"
-                key={t.id}
-                className={`type-card ${t.id === typeId ? 'selected' : ''}`}
-                onClick={() => selectType(t.id)}
-              >
-                <span className="type-icon">
-                  <Icon name={t.icon} size={22} />
-                </span>
-                <span className="type-label">{t.label}</span>
-                <span className="type-desc">{t.desc}</span>
-                {t.id === typeId && (
-                  <span className="type-check">
-                    <Icon name="check" size={13} strokeWidth={2.6} />
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* 2. 주제 입력 */}
+        {/* 1. 이미지 설명 */}
         <section className="field">
           <label className="field-label" htmlFor="subject">
-            2. 주제 입력
+            1. 만들고 싶은 이미지를 설명해 주세요
           </label>
-          <input
+          <textarea
             id="subject"
             className="subject-input"
-            type="text"
+            rows={3}
             value={subject}
-            placeholder={type.placeholder}
+            placeholder="예: 저녁노을이 시작되는 퇴근시간, 차를 운전하고 가는 여자주인공"
             onChange={(e) => setSubject(e.target.value)}
           />
           <p className="hint">
-            <Icon name="alert" size={14} /> 학생 이름·사진·개인정보는 입력하지 마세요. 주제(사물·장면)만
-            적어 주세요.
+            <Icon name="alert" size={14} /> 학생 이름·사진·개인정보는 입력하지 마세요. 스타일을 원하면
+            설명에 함께 적으세요 (예: "동화책 그림체로", "수채화 스타일로").
           </p>
         </section>
 
-        {/* 3. 사이즈 선택 */}
+        {/* 2. 사이즈 선택 */}
         <section className="field">
-          <label className="field-label">3. 사이즈</label>
+          <label className="field-label">2. 사이즈</label>
           <div className="aspect-row">
             {ASPECTS.map((a) => (
               <button
@@ -160,17 +121,15 @@ export default function App() {
             <p>마음에 들면 저장하고, 아니면 "다른 그림"으로 새로 만들어 보세요.</p>
           </div>
           <div className="result-grid">
-            {gen.seeds.map((seed) => (
-              <ImageCard
-                key={`${seed}-${gen.width}x${gen.height}-${gen.prompt}`}
-                prompt={gen.prompt}
-                seed={seed}
-                width={gen.width}
-                height={gen.height}
-                enhance={gen.enhance}
-                filename={gen.filename}
-              />
-            ))}
+            <ImageCard
+              key={`${gen.seed}-${gen.width}x${gen.height}-${gen.prompt}`}
+              prompt={gen.prompt}
+              seed={gen.seed}
+              width={gen.width}
+              height={gen.height}
+              enhance
+              filename={gen.filename}
+            />
           </div>
         </section>
       )}
@@ -195,7 +154,7 @@ function hashString(str) {
   return Math.abs(h)
 }
 
-function makeFilename(typeLabel, subject) {
-  const clean = subject.trim().replace(/\s+/g, '-').slice(0, 20) || 'image'
-  return `${typeLabel}_${clean}`
+function makeFilename(subject) {
+  const clean = subject.trim().replace(/\s+/g, '-').slice(0, 24) || 'image'
+  return `이미지_${clean}`
 }

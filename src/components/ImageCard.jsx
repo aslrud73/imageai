@@ -102,7 +102,7 @@ export default function ImageCard({ prompt, seed, width, height, enhance, filena
 
   return (
     <div className="image-card">
-      <div className="image-frame">
+      <div className="image-frame" style={{ aspectRatio: `${width} / ${height}` }}>
         {(status === 'loading' || status === 'retry-wait') && (
           <div className="loading-box" aria-label="생성 중">
             <span className="spinner-ring" />

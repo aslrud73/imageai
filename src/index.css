@@ -101,80 +101,6 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* ── Type grid ──────────────────────────── */
-.type-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-  gap: 10px;
-}
-.type-card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 6px;
-  padding: 14px 12px 12px;
-  border: 1.5px solid var(--line);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.75);
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  color: inherit;
-  transition: border-color 0.16s, background 0.16s, transform 0.1s, box-shadow 0.16s;
-}
-.type-card:hover {
-  border-color: rgba(99, 102, 241, 0.5);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-.type-card:active {
-  transform: scale(0.985);
-}
-.type-card.selected {
-  border-color: var(--brand);
-  background: linear-gradient(160deg, #f2f1ff, #f8f3ff);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.14), var(--shadow-sm);
-}
-.type-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  background: var(--brand-soft);
-  color: var(--brand-ink);
-  transition: background 0.16s, color 0.16s;
-}
-.type-card.selected .type-icon {
-  background: var(--grad);
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
-}
-.type-label {
-  font-weight: 800;
-  font-size: 0.94rem;
-}
-.type-desc {
-  font-size: 0.75rem;
-  color: var(--muted);
-  line-height: 1.4;
-}
-.type-check {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--grad);
-  color: #fff;
-}
-
 /* ── Subject input ──────────────────────── */
 .subject-input {
   width: 100%;
@@ -183,6 +109,8 @@ body {
   border-radius: 12px;
   font-size: 1rem;
   font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
   outline: none;
   background: rgba(255, 255, 255, 0.9);
   transition: border-color 0.16s, box-shadow 0.16s;
@@ -332,7 +260,7 @@ body {
 }
 .result-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 420px));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 640px));
   justify-content: center;
   gap: 18px;
 }
@@ -352,6 +280,7 @@ body {
 }
 .image-frame {
   position: relative;
+  /* 비율은 인라인 스타일로 실제 생성 사이즈에 맞춰 지정된다 */
   aspect-ratio: 1 / 1;
   background: linear-gradient(160deg, #f4f4fb, #eef0f8);
   display: flex;
