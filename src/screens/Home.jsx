@@ -1,14 +1,23 @@
 import Icon from '../components/Icons'
-import { weekKey, fmtDate, daysAgo } from '../store'
+import { todayKey, fmtDate, daysAgo } from '../store'
 
-export default function Home({ data, onRecord, goTab }) {
+export default function Home({ data, update, onRecord, goTab }) {
   const today = new Date()
   const dateStr = `${today.getMonth() + 1}월 ${today.getDate()}일 ${'일월화수목금토'[today.getDay()]}요일`
 
   // 하루가 지났는데 회고가 없는 기록
   const pendingReflections = data.logs.filter((l) => !l.reflection && daysAgo(l.createdAt) >= 1)
-  const wk = weekKey()
-  const checkedCount = data.agreements.filter((a) => a.checks?.includes(wk)).length
+  const tk = todayKey()
+  const checkedToday = data.agreements.filter((a) => a.checks?.includes(tk)).length
+
+  function toggleToday(id) {
+    update((d) => {
+      const a = d.agreements.find((x) => x.id === id)
+      a.checks = a.checks || []
+      a.checks = a.checks.includes(tk) ? a.checks.filter((k) => k !== tk) : [...a.checks, tk]
+      return d
+    })
+  }
 
   return (
     <div className="page">
@@ -52,7 +61,7 @@ export default function Home({ data, onRecord, goTab }) {
 
       <section className="section">
         <h2 className="section-title">
-          <Icon name="handshake" size={16} /> 이번 주 우리 약속
+          <Icon name="handshake" size={16} /> 오늘의 우리 약속
         </h2>
         {data.agreements.length === 0 ? (
           <button className="empty-card" onClick={() => goTab('agreements')}>
@@ -62,31 +71,33 @@ export default function Home({ data, onRecord, goTab }) {
           <>
             <div className="progress-card">
               <div className="progress-num">
-                <strong>{checkedCount}</strong>
-                <span> / {data.agreements.length}개 실천 중</span>
+                <strong>{checkedToday}</strong>
+                <span> / {data.agreements.length}개 오늘 실천</span>
               </div>
               <div className="progress-bar">
                 <div
                   className="progress-fill"
-                  style={{ width: `${data.agreements.length ? (checkedCount / data.agreements.length) * 100 : 0}%` }}
+                  style={{ width: `${data.agreements.length ? (checkedToday / data.agreements.length) * 100 : 0}%` }}
                 />
               </div>
             </div>
-            {data.agreements.slice(0, 2).map((a) => (
-              <button key={a.id} className="list-card" onClick={() => goTab('agreements')}>
-                <div>
-                  <strong>{a.title}</strong>
-                  {a.note && <small>{a.note}</small>}
+            {data.agreements.slice(0, 3).map((a) => {
+              const done = a.checks?.includes(tk)
+              return (
+                <div key={a.id} className="list-card static">
+                  <button className="list-card-main" onClick={() => goTab('agreements')}>
+                    <strong>{a.title}</strong>
+                    {a.note && <small>{a.note}</small>}
+                  </button>
+                  <button
+                    className={`pill clickable ${done ? 'done' : ''}`}
+                    onClick={() => toggleToday(a.id)}
+                  >
+                    {done && <Icon name="check" size={12} />} {done ? '완료' : '오늘 체크'}
+                  </button>
                 </div>
-                {a.checks?.includes(wk) ? (
-                  <span className="pill done">
-                    <Icon name="check" size={12} /> 실천
-                  </span>
-                ) : (
-                  <span className="pill">체크하기</span>
-                )}
-              </button>
-            ))}
+              )
+            })}
           </>
         )}
       </section>

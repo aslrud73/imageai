@@ -1,5 +1,5 @@
 import Icon from '../components/Icons'
-import { timeBucket, weekKey } from '../store'
+import { timeBucket, todayKey, weekDates } from '../store'
 
 // 우리 패턴: 공유에 동의한 데이터만 사용한다 (기획서 9장).
 // 비공개 메모·회고 원문은 절대 집계에 넣지 않는다.
@@ -31,10 +31,18 @@ export default function Patterns({ data }) {
   // 공유된 요청 문장
   const requests = recent.filter((l) => l.share.request && l.reflection?.request)
 
-  // 약속 이행률
-  const wk = weekKey()
-  const checked = data.agreements.filter((a) => a.checks?.includes(wk)).length
-  const rate = data.agreements.length ? Math.round((checked / data.agreements.length) * 100) : null
+  // 약속 실천율: 이번 주 실천한 날 수 ÷ (약속 수 × 이번 주 지나간 날 수)
+  const wdates = weekDates()
+  const tk = todayKey()
+  const elapsed = wdates.filter((d) => d <= tk).length
+  const weekChecks = data.agreements.reduce(
+    (sum, a) => sum + (a.checks || []).filter((d) => wdates.includes(d)).length,
+    0,
+  )
+  const rate =
+    data.agreements.length && elapsed
+      ? Math.round((weekChecks / (data.agreements.length * elapsed)) * 100)
+      : null
 
   return (
     <div className="page">
@@ -114,7 +122,7 @@ export default function Patterns({ data }) {
 
           {rate !== null && (
             <div className="stat-card">
-              <h3>이번 주 약속 이행</h3>
+              <h3>이번 주 약속 실천율</h3>
               <p className="big-num">
                 {rate}
                 <small>%</small>

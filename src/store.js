@@ -58,13 +58,29 @@ export function timeBucket(hhmm) {
   return '밤'
 }
 
-export function weekKey(date = new Date()) {
-  // 월요일 시작 주차 키 (약속 이행 체크 단위)
+// 로컬 기준 날짜 키 (YYYY-MM-DD) — 약속은 매일 체크한다
+export function localDateKey(date = new Date()) {
   const d = new Date(date)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+export function todayKey() {
+  return localDateKey(new Date())
+}
+
+// 이번 주(월~일) 7일의 날짜 키 배열
+export function weekDates() {
+  const d = new Date()
   const day = (d.getDay() + 6) % 7
   d.setDate(d.getDate() - day)
-  return d.toISOString().slice(0, 10)
+  return Array.from({ length: 7 }, (_, i) => {
+    const x = new Date(d)
+    x.setDate(d.getDate() + i)
+    return localDateKey(x)
+  })
 }
+
+export const DAY_NAMES = ['월', '화', '수', '목', '금', '토', '일']
 
 export function daysAgo(iso) {
   return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
