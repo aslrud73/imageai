@@ -64,19 +64,28 @@ export default function Logs({ data, update, onRecord }) {
                 daysAgo(l.createdAt) >= 1 && <span className="mini-badge wait">회고 대기</span>
               )}
             </div>
+            <span className={`expand-arrow ${openId === l.id ? 'up' : ''}`}>
+              <Icon name="chevronRight" size={16} />
+            </span>
           </button>
 
           {openId === l.id && (
             <div className="log-detail">
+              <p>
+                <span className="k">감정 강도</span> {l.emotion} / 5 ({EMOTION_LABELS[l.emotion - 1]})
+              </p>
               {l.myReactions.length > 0 && (
                 <p><span className="k">나의 반응</span> {l.myReactions.join(', ')}</p>
               )}
               {l.partnerReactions.length > 0 && (
                 <p><span className="k">내가 본 상대</span> {l.partnerReactions.join(', ')}</p>
               )}
+              <p>
+                <span className="k">해결 여부</span> {l.resolved ? '어느 정도 풀렸어요' : '아직 풀리지 않았어요'}
+              </p>
               {l.memo && (
                 <p className="memo">
-                  <span className="k"><Icon name="lock" size={11} /> 비공개 메모</span> {l.memo}
+                  <span className="k"><Icon name="lock" size={11} /> 남기고 싶은 말</span> {l.memo}
                 </p>
               )}
               {l.reflection && (
@@ -84,6 +93,9 @@ export default function Logs({ data, update, onRecord }) {
                   <p><span className="k">실제 욕구</span> {l.reflection.realNeed}</p>
                   {l.reflection.request && (
                     <p><span className="k">요청 문장</span> {l.reflection.request}</p>
+                  )}
+                  {l.reflection.memo && (
+                    <p><span className="k">회고 메모</span> {l.reflection.memo}</p>
                   )}
                 </div>
               )}

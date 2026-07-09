@@ -3,11 +3,15 @@ import Icon from '../components/Icons'
 import { TOPICS, MY_REACTIONS, PARTNER_REACTIONS, EMOTION_LABELS, newId } from '../store'
 
 // 30초 빠른 기록: 판단 없이 사실과 느낌만. 저장은 기본 비공개.
+// "기타"를 고르면 어떤 것인지 직접 적는다 (주제·나의 반응·상대 반응 공통).
 export default function RecordForm({ update, onDone, onCancel }) {
   const [topics, setTopics] = useState([])
+  const [topicEtc, setTopicEtc] = useState('')
   const [emotion, setEmotion] = useState(0)
   const [myReactions, setMyReactions] = useState([])
+  const [myEtc, setMyEtc] = useState('')
   const [partnerReactions, setPartnerReactions] = useState([])
+  const [partnerEtc, setPartnerEtc] = useState('')
   const [memo, setMemo] = useState('')
   const [resolved, setResolved] = useState(false)
   const [error, setError] = useState('')
@@ -16,13 +20,30 @@ export default function RecordForm({ update, onDone, onCancel }) {
     setList(list.includes(v) ? list.filter((x) => x !== v) : [...list, v])
   }
 
+  // "기타"를 직접 입력한 내용으로 치환
+  function resolveEtc(list, etcText) {
+    return list.map((v) => (v === '기타' ? etcText.trim() : v)).filter(Boolean)
+  }
+
   function save() {
     if (topics.length === 0) {
       setError('주제를 하나 이상 골라 주세요.')
       return
     }
+    if (topics.includes('기타') && !topicEtc.trim()) {
+      setError('"기타" 주제가 어떤 것인지 적어 주세요.')
+      return
+    }
     if (!emotion) {
       setError('감정 강도를 선택해 주세요.')
+      return
+    }
+    if (myReactions.includes('기타') && !myEtc.trim()) {
+      setError('나의 반응 "기타"가 어떤 것인지 적어 주세요.')
+      return
+    }
+    if (partnerReactions.includes('기타') && !partnerEtc.trim()) {
+      setError('상대 반응 "기타"가 어떤 것인지 적어 주세요.')
       return
     }
     const now = new Date()
@@ -31,10 +52,10 @@ export default function RecordForm({ update, onDone, onCancel }) {
         id: newId('log'),
         createdAt: now.toISOString(),
         time: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`,
-        topics,
+        topics: resolveEtc(topics, topicEtc),
         emotion,
-        myReactions,
-        partnerReactions,
+        myReactions: resolveEtc(myReactions, myEtc),
+        partnerReactions: resolveEtc(partnerReactions, partnerEtc),
         memo: memo.trim(),
         resolved,
         reflection: null,
@@ -72,6 +93,16 @@ export default function RecordForm({ update, onDone, onCancel }) {
             </button>
           ))}
         </div>
+        {topics.includes('기타') && (
+          <input
+            type="text"
+            className="etc-input"
+            value={topicEtc}
+            onChange={(e) => setTopicEtc(e.target.value)}
+            placeholder="어떤 주제였는지 직접 적어 주세요"
+            autoFocus
+          />
+        )}
       </section>
 
       <section className="field">
@@ -93,7 +124,7 @@ export default function RecordForm({ update, onDone, onCancel }) {
       <section className="field">
         <label>나의 반응은 어땠나요?</label>
         <div className="chip-row">
-          {MY_REACTIONS.map((r) => (
+          {[...MY_REACTIONS, '기타'].map((r) => (
             <button
               key={r}
               className={`chip ${myReactions.includes(r) ? 'on' : ''}`}
@@ -103,12 +134,21 @@ export default function RecordForm({ update, onDone, onCancel }) {
             </button>
           ))}
         </div>
+        {myReactions.includes('기타') && (
+          <input
+            type="text"
+            className="etc-input"
+            value={myEtc}
+            onChange={(e) => setMyEtc(e.target.value)}
+            placeholder="나의 반응을 직접 적어 주세요"
+          />
+        )}
       </section>
 
       <section className="field">
         <label>내가 본 상대의 반응은? <small>(평가가 아니라 관찰만)</small></label>
         <div className="chip-row">
-          {PARTNER_REACTIONS.map((r) => (
+          {[...PARTNER_REACTIONS, '기타'].map((r) => (
             <button
               key={r}
               className={`chip ${partnerReactions.includes(r) ? 'on' : ''}`}
@@ -118,15 +158,24 @@ export default function RecordForm({ update, onDone, onCancel }) {
             </button>
           ))}
         </div>
+        {partnerReactions.includes('기타') && (
+          <input
+            type="text"
+            className="etc-input"
+            value={partnerEtc}
+            onChange={(e) => setPartnerEtc(e.target.value)}
+            placeholder="상대의 반응을 직접 적어 주세요"
+          />
+        )}
       </section>
 
       <section className="field">
         <label>남기고 싶은 말 <small>(비공개 메모 — 누구에게도 보이지 않아요)</small></label>
         <textarea
-          rows={3}
+          rows={4}
           value={memo}
           onChange={(e) => setMemo(e.target.value)}
-          placeholder="예: 혼자 책임지는 느낌이 들었다."
+          placeholder="그날의 상황과 느낌을 자유롭게 적어보세요."
         />
       </section>
 

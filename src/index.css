@@ -385,6 +385,16 @@ textarea {
   color: #fdf9f4;
   font-weight: 700;
 }
+.etc-input {
+  width: 100%;
+  margin-top: 9px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  background: var(--card);
+  font-size: 0.9rem;
+  outline: none;
+}
 
 .emotion-row {
   display: flex;
@@ -535,6 +545,16 @@ textarea {
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+}
+.expand-arrow {
+  display: inline-flex;
+  color: var(--muted);
+  transform: rotate(90deg);
+  transition: transform 0.15s;
+  flex-shrink: 0;
+}
+.expand-arrow.up {
+  transform: rotate(-90deg);
 }
 .mini-badge {
   font-size: 0.68rem;
