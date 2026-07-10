@@ -76,7 +76,9 @@ export default function Patterns({ data, update, initialReceiving = false }) {
   // 약속 실천율: 이번 주 실천한 날 수 ÷ (진행 중 약속 수 × 이번 주 지나간 날 수)
   const wdates = weekDates()
   const tk = todayKey()
-  const activeAgreements = data.agreements.filter((a) => !a.endDate || a.endDate >= tk)
+  const activeAgreements = data.agreements.filter(
+    (a) => !a.completedAt && (!a.endDate || a.endDate >= tk),
+  )
   const elapsed = wdates.filter((d) => d <= tk).length
   const weekChecks = activeAgreements.reduce(
     (sum, a) => sum + (a.checks || []).filter((d) => wdates.includes(d)).length,

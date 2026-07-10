@@ -549,6 +549,11 @@ textarea {
 .small-btn.danger {
   color: var(--danger);
 }
+.small-btn.complete {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #f6faf4;
+}
 
 /* ── 기록 카드 ────────────────────────── */
 .log-card {
@@ -949,6 +954,7 @@ textarea {
 .agreement-foot {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   margin-top: 10px;
 }
 .agreement-main strong {

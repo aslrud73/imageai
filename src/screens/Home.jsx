@@ -9,8 +9,10 @@ export default function Home({ data, update, onRecord, goTab, onReceive }) {
   // 하루가 지났는데 회고가 없는 기록
   const pendingReflections = data.logs.filter((l) => !l.reflection && daysAgo(l.createdAt) >= 1)
   const tk = todayKey()
-  // 기간이 끝난 약속은 오늘의 목록에서 제외
-  const activeAgreements = data.agreements.filter((a) => !a.endDate || a.endDate >= tk)
+  // 기간이 끝났거나 직접 완료한 약속은 오늘의 목록에서 제외
+  const activeAgreements = data.agreements.filter(
+    (a) => !a.completedAt && (!a.endDate || a.endDate >= tk),
+  )
   const checkedToday = activeAgreements.filter((a) => a.checks?.includes(tk)).length
 
   function toggleToday(id) {

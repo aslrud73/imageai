@@ -22,7 +22,27 @@ export default function Agreements({ data, update }) {
   const tk = todayKey()
 
   const startOf = (a) => a.startDate || a.createdAt.slice(0, 10)
-  const isDone = (a) => !!a.endDate && a.endDate < tk
+  // 직접 완료(completedAt)했거나 기간이 지난 약속
+  const isDone = (a) => !!a.completedAt || (!!a.endDate && a.endDate < tk)
+  // 통계·체크 범위의 실질적 종료일: 직접 완료일이 우선
+  const effEnd = (a) => a.completedAt || a.endDate
+
+  function completeNow(id) {
+    if (!confirm('이 약속을 오늘로 완료할까요?\n지금까지의 실천이 통계로 정리돼요.')) return
+    update((d) => {
+      const a = d.agreements.find((x) => x.id === id)
+      a.completedAt = tk
+      return d
+    })
+  }
+
+  function undoComplete(id) {
+    update((d) => {
+      const a = d.agreements.find((x) => x.id === id)
+      delete a.completedAt
+      return d
+    })
+  }
 
   function add() {
     if (!title.trim()) return
@@ -123,14 +143,13 @@ export default function Agreements({ data, update }) {
         const checks = a.checks || []
         const start = startOf(a)
         const done = isDone(a)
+        const end = effEnd(a)
         const doneToday = checks.includes(tk)
         const open = openId === a.id
         const dday = a.endDate && !done ? daysBetween(tk, a.endDate) - 1 : null
-        // 기간 내 실천 통계
-        const periodTotal = a.endDate ? daysBetween(start, a.endDate) : null
-        const periodChecks = a.endDate
-          ? checks.filter((k) => k >= start && k <= a.endDate).length
-          : checks.length
+        // 기간(또는 직접 완료 시점까지) 실천 통계
+        const periodTotal = end ? daysBetween(start, end) : null
+        const periodChecks = end ? checks.filter((k) => k >= start && k <= end).length : checks.length
         const pct = periodTotal ? Math.round((periodChecks / periodTotal) * 100) : null
 
         // 펼침 상태에서 보여줄 주 (좌우 이동)
@@ -146,7 +165,7 @@ export default function Agreements({ data, update }) {
                 <strong>{a.title}</strong>
                 <small>
                   {done
-                    ? `기간 완료 · ${periodTotal}일 중 ${periodChecks}일 실천`
+                    ? `완료 · ${periodTotal}일 중 ${periodChecks}일 실천`
                     : a.endDate
                       ? `${fmtShort(start)} ~ ${fmtShort(a.endDate)} · 기간 중 ${periodChecks}일 실천`
                       : `계속 · 지금까지 ${checks.length}일 실천`}
@@ -195,7 +214,7 @@ export default function Agreements({ data, update }) {
 
                 <div className="week-strip">
                   {wdates.map((dt, i) => {
-                    const inPeriod = dt >= start && (!a.endDate || dt <= a.endDate)
+                    const inPeriod = dt >= start && (!end || dt <= end)
                     const isFuture = dt > tk
                     const tappable = inPeriod && !isFuture
                     const on = checks.includes(dt)
@@ -220,11 +239,12 @@ export default function Agreements({ data, update }) {
                 <p className="section-hint">지난 날짜도 눌러서 체크를 보완할 수 있어요.</p>
 
                 {/* 통계 */}
-                {a.endDate ? (
+                {end ? (
                   <div className={`agreement-result ${done ? 'final' : ''}`}>
                     <div className="result-line">
                       <strong>
-                        {done ? '기간 완료' : '진행 중'} — {periodTotal}일 중 {periodChecks}일 실천
+                        {a.completedAt ? '완료' : done ? '기간 완료' : '진행 중'} — {periodTotal}일 중{' '}
+                        {periodChecks}일 실천
                       </strong>
                       <span className="result-pct">{pct}%</span>
                     </div>
@@ -244,6 +264,15 @@ export default function Agreements({ data, update }) {
                 )}
 
                 <div className="agreement-foot">
+                  {!done ? (
+                    <button className="small-btn complete" onClick={() => completeNow(a.id)}>
+                      <Icon name="check" size={14} /> 완료하기
+                    </button>
+                  ) : a.completedAt ? (
+                    <button className="small-btn" onClick={() => undoComplete(a.id)}>
+                      <Icon name="refresh" size={14} /> 완료 취소
+                    </button>
+                  ) : null}
                   <button
                     className="small-btn danger"
                     onClick={() => {
