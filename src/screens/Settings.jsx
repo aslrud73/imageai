@@ -411,6 +411,29 @@ export default function Settings({ data, setData }) {
           노트</strong>예요. 기록의 목적은 잘잘못을 가리는 것이 아니라, 반복되는 패턴을 확인하고 다음
           대화를 준비하는 것입니다.
         </p>
+        <ul className="intro-points">
+          <li>
+            <Icon name="lock" size={15} />
+            <span>
+              <strong>기본 비공개</strong> — 내 감정 기록은 나만 볼 수 있어요. 상대에게 자동으로
+              공개되지 않아요.
+            </span>
+          </li>
+          <li>
+            <Icon name="share" size={15} />
+            <span>
+              <strong>선택 공유</strong> — 공유할 항목은 내가 고르고, 상대에게 보일 모습을 미리
+              확인해요.
+            </span>
+          </li>
+          <li>
+            <Icon name="handshake" size={15} />
+            <span>
+              <strong>함께 조율</strong> — 잘잘못을 가리는 대신, 반복되는 패턴을 보고 작은 약속을
+              만들어요.
+            </span>
+          </li>
+        </ul>
       </Section>
 
       <Section icon="alert" title="안전 안내" warn>
