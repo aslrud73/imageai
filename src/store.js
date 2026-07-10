@@ -79,14 +79,31 @@ export function todayKey() {
 
 // 이번 주(월~일) 7일의 날짜 키 배열
 export function weekDates() {
+  return weekDatesOffset(0)
+}
+
+// 기준 주에서 offset 주만큼 이동한 주(월~일)의 날짜 키 배열 (약속 주간 넘겨보기용)
+export function weekDatesOffset(offset = 0) {
   const d = new Date()
   const day = (d.getDay() + 6) % 7
-  d.setDate(d.getDate() - day)
+  d.setDate(d.getDate() - day + offset * 7)
   return Array.from({ length: 7 }, (_, i) => {
     const x = new Date(d)
     x.setDate(d.getDate() + i)
     return localDateKey(x)
   })
+}
+
+// 오늘부터 n일짜리 기간의 종료일 키
+export function endDateAfter(days) {
+  const d = new Date()
+  d.setDate(d.getDate() + days - 1)
+  return localDateKey(d)
+}
+
+// 두 날짜 키 사이의 일수 (양 끝 포함)
+export function daysBetween(startKey, endKey) {
+  return Math.round((new Date(endKey) - new Date(startKey)) / 86400000) + 1
 }
 
 export const DAY_NAMES = ['월', '화', '수', '목', '금', '토', '일']

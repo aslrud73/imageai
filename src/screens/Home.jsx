@@ -9,7 +9,9 @@ export default function Home({ data, update, onRecord, goTab, onReceive }) {
   // 하루가 지났는데 회고가 없는 기록
   const pendingReflections = data.logs.filter((l) => !l.reflection && daysAgo(l.createdAt) >= 1)
   const tk = todayKey()
-  const checkedToday = data.agreements.filter((a) => a.checks?.includes(tk)).length
+  // 기간이 끝난 약속은 오늘의 목록에서 제외
+  const activeAgreements = data.agreements.filter((a) => !a.endDate || a.endDate >= tk)
+  const checkedToday = activeAgreements.filter((a) => a.checks?.includes(tk)).length
 
   function toggleToday(id) {
     update((d) => {
@@ -163,25 +165,28 @@ export default function Home({ data, update, onRecord, goTab, onReceive }) {
         <h2 className="section-title">
           <Icon name="handshake" size={16} /> 오늘의 우리 약속
         </h2>
-        {data.agreements.length === 0 ? (
+        {activeAgreements.length === 0 ? (
           <button className="empty-card" onClick={() => goTab('agreements')}>
-            아직 함께 정한 약속이 없어요. <span className="link">첫 약속 만들기</span>
+            {data.agreements.length > 0
+              ? '진행 중인 약속이 없어요. '
+              : '아직 함께 정한 약속이 없어요. '}
+            <span className="link">새 약속 만들기</span>
           </button>
         ) : (
           <>
             <div className="progress-card">
               <div className="progress-num">
                 <strong>{checkedToday}</strong>
-                <span> / {data.agreements.length}개 오늘 실천</span>
+                <span> / {activeAgreements.length}개 오늘 실천</span>
               </div>
               <div className="progress-bar">
                 <div
                   className="progress-fill"
-                  style={{ width: `${data.agreements.length ? (checkedToday / data.agreements.length) * 100 : 0}%` }}
+                  style={{ width: `${activeAgreements.length ? (checkedToday / activeAgreements.length) * 100 : 0}%` }}
                 />
               </div>
             </div>
-            {data.agreements.slice(0, 3).map((a) => {
+            {activeAgreements.slice(0, 3).map((a) => {
               const done = a.checks?.includes(tk)
               return (
                 <div key={a.id} className="list-card static">

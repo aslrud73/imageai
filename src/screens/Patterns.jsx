@@ -73,17 +73,18 @@ export default function Patterns({ data, update, initialReceiving = false }) {
   const myRequests = recent.filter((l) => l.share.request && l.reflection?.request)
   const partnerRequests = receivedItems.filter((it) => it.request)
 
-  // 약속 실천율
+  // 약속 실천율: 이번 주 실천한 날 수 ÷ (진행 중 약속 수 × 이번 주 지나간 날 수)
   const wdates = weekDates()
   const tk = todayKey()
+  const activeAgreements = data.agreements.filter((a) => !a.endDate || a.endDate >= tk)
   const elapsed = wdates.filter((d) => d <= tk).length
-  const weekChecks = data.agreements.reduce(
+  const weekChecks = activeAgreements.reduce(
     (sum, a) => sum + (a.checks || []).filter((d) => wdates.includes(d)).length,
     0,
   )
   const rate =
-    data.agreements.length && elapsed
-      ? Math.round((weekChecks / (data.agreements.length * elapsed)) * 100)
+    activeAgreements.length && elapsed
+      ? Math.round((weekChecks / (activeAgreements.length * elapsed)) * 100)
       : null
 
   const hasAny = recent.length > 0 || receivedItems.length > 0

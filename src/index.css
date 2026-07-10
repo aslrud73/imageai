@@ -841,14 +841,115 @@ textarea {
   border-color: #c7d2c2;
   background: #fbfdf9;
 }
-.agreement-top {
+.agreement-card.finished {
+  opacity: 0.85;
+}
+.agreement-head {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  align-items: center;
   gap: 8px;
+  cursor: pointer;
 }
 .agreement-main {
   flex: 1;
+  min-width: 0;
+}
+.day-quick {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.day-quick.on {
+  background: var(--sage);
+  border: none;
+  color: #f6faf4;
+}
+.agreement-body {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.agreement-note {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.week-nav .icon-btn {
+  width: 32px;
+  height: 32px;
+}
+.week-nav .icon-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.week-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--soft-ink);
+}
+.day-cell {
+  border: 1px solid transparent;
+  font-family: inherit;
+  cursor: default;
+  padding: 7px 0 6px;
+}
+.day-cell.tap {
+  cursor: pointer;
+}
+.day-cell.tap:active {
+  background: var(--accent-soft);
+}
+.day-cell:disabled {
+  cursor: default;
+}
+.agreement-result {
+  margin-top: 10px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border-radius: 12px;
+}
+.agreement-result.final {
+  background: var(--sage-soft);
+}
+.result-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+.result-line strong {
+  font-size: 0.86rem;
+}
+.result-pct {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sage);
+}
+.result-note {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--soft-ink);
+}
+.agreement-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
 .agreement-main strong {
   display: block;
