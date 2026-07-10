@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { loadData, saveData, getPinHash } from './store'
+import { maybeAutoBackup } from './api/googleDrive'
 import Icon from './components/Icons'
 import PinLock from './components/PinLock'
 import Landing from './screens/Landing'
@@ -32,6 +33,8 @@ export default function App() {
 
   useEffect(() => {
     saveData(data)
+    // 드라이브가 연결돼 있으면 변경분을 자동 백업 (3초 디바운스)
+    maybeAutoBackup(data)
   }, [data])
 
   // 모든 화면이 이 함수 하나로 데이터를 갱신한다

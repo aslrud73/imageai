@@ -49,6 +49,23 @@ src/
     Settings.jsx        안내·안전 문구·데이터 삭제
 ```
 
+## Google Drive 자동 백업 활성화 (선택)
+
+사용자가 자기 구글 계정을 연결해 **본인 드라이브에 자동 백업**하는 기능.
+`VITE_GOOGLE_CLIENT_ID` 환경 변수가 있어야 활성화된다 (없으면 설정 화면에 "준비 중" 표시).
+
+1. [Google Cloud Console](https://console.cloud.google.com)에서 새 프로젝트 생성
+2. "API 및 서비스 → 라이브러리"에서 **Google Drive API** 사용 설정
+3. "OAuth 동의 화면" 구성 — 게시 상태 **테스트**, 테스트 사용자에 사용할 이메일 추가
+4. "사용자 인증 정보 → OAuth 클라이언트 ID" 생성
+   - 유형: **웹 애플리케이션**
+   - 승인된 JavaScript 원본: 배포 주소 (예: `https://imageai-xxx.vercel.app`) + `http://localhost:5173`
+5. 발급된 클라이언트 ID를 Vercel → Settings → Environment Variables에
+   `VITE_GOOGLE_CLIENT_ID` 로 등록 후 재배포
+
+- 권한 범위는 `drive.file` (이 앱이 만든 파일만 접근) — 사용자의 다른 드라이브 파일은 볼 수 없음
+- 개발자 비용 0원: 저장 용량은 각 사용자 본인의 드라이브(무료 15GB)를 사용
+
 ## 다음 단계 (기획서 로드맵)
 
 - 커플 연결코드 + 개인계정 (Firebase Auth/Firestore 또는 Supabase)

@@ -12,6 +12,14 @@ import {
   newId,
 } from '../store'
 import { encryptToCode, decryptFromCode } from '../api/shareCrypto'
+import {
+  isDriveConfigured,
+  getDriveStatus,
+  connectDrive,
+  backupToDrive,
+  restoreFromDrive,
+  disconnectDrive,
+} from '../api/googleDrive'
 
 export default function Settings({ data, setData }) {
   const fileRef = useRef(null)
@@ -21,6 +29,69 @@ export default function Settings({ data, setData }) {
   const [pin1, setPin1] = useState('')
   const [pin2, setPin2] = useState('')
   const [pinMsg, setPinMsg] = useState('')
+  const [drive, setDrive] = useState(getDriveStatus())
+  const [driveBusy, setDriveBusy] = useState('')
+
+  // ── Google Drive 백업 ──────────────────
+  async function handleDriveConnect() {
+    setDriveBusy('connect')
+    try {
+      await connectDrive()
+      await backupToDrive(data) // 연결 직후 첫 백업까지
+      setDrive(getDriveStatus())
+    } catch (err) {
+      alert(`연결에 실패했어요.\n${err.message}`)
+    } finally {
+      setDriveBusy('')
+    }
+  }
+
+  async function handleDriveBackup() {
+    setDriveBusy('backup')
+    try {
+      await backupToDrive(data)
+      setDrive(getDriveStatus())
+    } catch (err) {
+      alert(`백업에 실패했어요.\n${err.message}`)
+    } finally {
+      setDriveBusy('')
+    }
+  }
+
+  async function handleDriveRestore() {
+    setDriveBusy('restore')
+    try {
+      const restored = await restoreFromDrive()
+      if (!restored) {
+        alert('드라이브에 저장된 백업이 아직 없어요.')
+        return
+      }
+      if (
+        confirm(
+          `드라이브 백업에서 기록 ${restored.logs.length}건, 약속 ${restored.agreements.length}개를 찾았어요.\n\n지금 기기의 데이터를 이 백업으로 교체할까요?`,
+        )
+      ) {
+        setData(restored)
+      }
+    } catch (err) {
+      alert(`복원에 실패했어요.\n${err.message}`)
+    } finally {
+      setDriveBusy('')
+    }
+  }
+
+  function handleDriveDisconnect() {
+    if (confirm('Google Drive 연결을 해제할까요?\n드라이브에 이미 저장된 백업 파일은 그대로 남아요.')) {
+      disconnectDrive()
+      setDrive(null)
+    }
+  }
+
+  const fmtTime = (iso) => {
+    if (!iso) return null
+    const d = new Date(iso)
+    return `${d.getMonth() + 1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  }
 
   // ── 백업 내보내기: JSON 파일 다운로드 ─────────
   function handleExport() {
@@ -247,6 +318,58 @@ export default function Settings({ data, setData }) {
           현재 기록 {data.logs.length}건 · 약속 {data.agreements.length}개 · 체크인{' '}
           {(data.checkins || []).length}일
         </p>
+      </div>
+
+      {/* Google Drive 자동 백업 */}
+      <div className="setting-card">
+        <h3>
+          <Icon name="cloud" size={16} /> Google Drive 자동 백업
+        </h3>
+        {!isDriveConfigured() ? (
+          <p>
+            내 구글 드라이브에 자동으로 백업하는 기능이에요. <strong>준비 중</strong> — 관리자가 구글
+            클라이언트 ID를 설정하면 활성화됩니다.
+          </p>
+        ) : !drive ? (
+          <>
+            <p>
+              연결해 두면 기록이 바뀔 때마다 <strong>내 구글 드라이브</strong>에 자동 백업돼요. 앱은
+              비밀번호를 알 수 없고, 이 앱이 만든 백업 파일 하나에만 접근합니다.
+            </p>
+            <div className="setting-actions">
+              <button className="small-btn accent" disabled={!!driveBusy} onClick={handleDriveConnect}>
+                <Icon name="cloud" size={14} /> {driveBusy === 'connect' ? '연결 중…' : 'Google Drive 연결하기'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p>
+              연결됨{drive.email ? `: ${drive.email}` : ''}
+              {drive.lastBackupAt && (
+                <>
+                  <br />
+                  마지막 백업: {fmtTime(drive.lastBackupAt)}
+                </>
+              )}
+            </p>
+            <div className="setting-actions">
+              <button className="small-btn accent" disabled={!!driveBusy} onClick={handleDriveBackup}>
+                {driveBusy === 'backup' ? '백업 중…' : '지금 백업'}
+              </button>
+              <button className="small-btn" disabled={!!driveBusy} onClick={handleDriveRestore}>
+                {driveBusy === 'restore' ? '복원 중…' : '드라이브에서 복원'}
+              </button>
+              <button className="small-btn danger" disabled={!!driveBusy} onClick={handleDriveDisconnect}>
+                연결 해제
+              </button>
+            </div>
+            <p className="setting-note">
+              오랜 시간이 지나면 보안을 위해 구글 승인 창이 다시 뜰 수 있어요. 새 기기에서는 연결 후
+              "드라이브에서 복원"을 누르면 기록이 돌아와요.
+            </p>
+          </>
+        )}
       </div>
 
       {/* 전체 기록 전달 */}
