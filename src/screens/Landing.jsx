@@ -18,8 +18,8 @@ export default function Landing({ onStart }) {
 
         <p className="landing-quote">
           마음결은 함께 쓰는 싸움 기록장이 아니에요.{' '}
-          <strong>각자 쓰고, 필요한 만큼만 공유하는 노트</strong>입니다. 기록의 목적은 잘잘못을
-          가리는 것이 아니라, 반복되는 패턴을 확인하고 다음 대화를 준비하는 것.
+          <strong>각자 쓰고, 필요한 만큼만 공유하는 노트</strong>예요. 기록의 목적은 잘잘못을
+          가리는 것이 아니라, 반복되는 패턴을 확인하고 다음 대화를 준비하는 거예요.
         </p>
 
         <ul className="landing-points">
