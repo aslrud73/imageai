@@ -341,6 +341,10 @@ export default function Settings({ data, setData }) {
                 <Icon name="cloud" size={14} /> {driveBusy === 'connect' ? '연결 중…' : 'Google Drive 연결하기'}
               </button>
             </div>
+            <p className="setting-note">
+              베타 기능 — 현재는 등록된 테스트 사용자만 연결할 수 있어요. 연결 시 "확인되지 않은 앱"
+              안내가 뜨면 아직 명단에 없는 계정이에요. 일반 백업은 위의 파일 백업을 이용해 주세요.
+            </p>
           </>
         ) : (
           <>

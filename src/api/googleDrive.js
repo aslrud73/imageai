@@ -5,7 +5,12 @@
 // - 개발자 비용 0원: 저장 용량은 각 사용자 본인의 드라이브를 쓴다.
 import { exportBackup, parseBackup } from '../store'
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
+// OAuth 클라이언트 ID는 공개 값(모든 방문자의 브라우저에 전달됨)이며,
+// 등록된 "승인된 JavaScript 원본" 도메인에서만 작동한다.
+// 환경 변수(VITE_GOOGLE_CLIENT_ID)가 있으면 그 값이 우선한다.
+const DEFAULT_CLIENT_ID =
+  '45162465850-dr9tb0cg58d1h01a3umn8qsobj23iiqa.apps.googleusercontent.com'
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || DEFAULT_CLIENT_ID
 const SCOPES =
   'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email'
 const FILE_NAME = 'maumgyeol-backup.json'
