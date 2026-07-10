@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Icon from '../components/Icons'
 import { todayKey, localDateKey, fmtDate, daysAgo, WEATHERS, getWeather } from '../store'
 
-export default function Home({ data, update, onRecord, goTab }) {
+export default function Home({ data, update, onRecord, goTab, onReceive }) {
   const today = new Date()
   const dateStr = `${today.getMonth() + 1}월 ${today.getDate()}일 ${'일월화수목금토'[today.getDay()]}요일`
 
@@ -59,6 +59,17 @@ export default function Home({ data, update, onRecord, goTab }) {
           <small>판단하지 않고, 내 느낌만 짧게</small>
         </span>
         <Icon name="chevronRight" size={18} className="cta-arrow" />
+      </button>
+
+      <button className="receive-entry" onClick={onReceive}>
+        <span className="receive-icon">
+          <Icon name="download" size={18} />
+        </span>
+        <span className="receive-text">
+          <strong>상대의 공유 코드 받기</strong>
+          <small>카톡으로 받은 코드를 여기서 열어요</small>
+        </span>
+        <Icon name="chevronRight" size={16} className="cta-arrow" />
       </button>
 
       <p className="privacy-note">

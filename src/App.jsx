@@ -22,6 +22,8 @@ export default function App() {
   const [data, setData] = useState(loadData)
   const [tab, setTab] = useState('home')
   const [recording, setRecording] = useState(false)
+  // 홈의 "공유 받기" 버튼으로 진입하면 우리 패턴이 입력창이 열린 채 시작된다
+  const [receiveIntent, setReceiveIntent] = useState(false)
   const [started, setStarted] = useState(() => localStorage.getItem('maumgyeol_started') === '1')
   // PIN이 설정돼 있으면 세션마다 잠금 화면부터 (탭 전환은 유지, 앱을 새로 열면 다시 잠김)
   const [locked, setLocked] = useState(
@@ -80,10 +82,19 @@ export default function App() {
         ) : (
           <>
             {tab === 'home' && (
-              <Home data={data} update={update} onRecord={() => setRecording(true)} goTab={setTab} />
+              <Home
+                data={data}
+                update={update}
+                onRecord={() => setRecording(true)}
+                goTab={setTab}
+                onReceive={() => {
+                  setReceiveIntent(true)
+                  setTab('patterns')
+                }}
+              />
             )}
             {tab === 'logs' && <Logs data={data} update={update} onRecord={() => setRecording(true)} />}
-            {tab === 'patterns' && <Patterns data={data} update={update} />}
+            {tab === 'patterns' && <Patterns data={data} update={update} initialReceiving={receiveIntent} />}
             {tab === 'agreements' && <Agreements data={data} update={update} />}
             {tab === 'settings' && <Settings data={data} setData={setData} />}
           </>
@@ -96,7 +107,10 @@ export default function App() {
             <button
               key={t.id}
               className={`tab ${tab === t.id ? 'active' : ''}`}
-              onClick={() => setTab(t.id)}
+              onClick={() => {
+                setReceiveIntent(false)
+                setTab(t.id)
+              }}
             >
               <Icon name={t.icon} size={21} />
               <span>{t.label}</span>

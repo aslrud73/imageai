@@ -11,9 +11,9 @@ const PERIODS = [
 
 // 우리 패턴: 내가 공유에 동의한 기록 + 상대가 코드로 보내준 기록을 함께 본다.
 // 비공개 메모·회고 원문은 절대 집계에 넣지 않는다.
-export default function Patterns({ data, update }) {
+export default function Patterns({ data, update, initialReceiving = false }) {
   const [period, setPeriod] = useState(7)
-  const [receiving, setReceiving] = useState(false)
+  const [receiving, setReceiving] = useState(initialReceiving)
   const [codeInput, setCodeInput] = useState('')
   const [pinInput, setPinInput] = useState('')
   const [recvMsg, setRecvMsg] = useState('')

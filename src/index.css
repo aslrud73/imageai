@@ -141,6 +141,49 @@ textarea {
   opacity: 0.7;
 }
 
+.receive-entry {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 13px 16px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  border-radius: 15px;
+  cursor: pointer;
+  text-align: left;
+  box-shadow: var(--shadow);
+}
+.receive-entry:active {
+  background: var(--accent-soft);
+}
+.receive-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--sage-soft);
+  color: var(--sage);
+  flex-shrink: 0;
+}
+.receive-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.receive-text strong {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+.receive-text small {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
 .privacy-note {
   margin: 12px 2px 4px;
   font-size: 0.76rem;
