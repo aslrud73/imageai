@@ -51,7 +51,12 @@ export default function Landing({ onStart }) {
         <button className="btn-primary" onClick={onStart}>
           시작하기
         </button>
-        <p className="landing-note">가입 없이 시작해요. 모든 기록은 이 기기 안에만 저장됩니다.</p>
+        <p className="landing-note">
+          가입 없이 시작해요. 모든 기록은 이 기기 안에만 저장됩니다.{' '}
+          <a className="policy-link" href="/privacy.html" target="_blank" rel="noopener noreferrer">
+            개인정보처리방침
+          </a>
+        </p>
       </div>
     </div>
   )

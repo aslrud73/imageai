@@ -433,7 +433,12 @@ export default function Settings({ data, setData }) {
         <Icon name="trash" size={15} /> 모든 데이터 삭제
       </button>
 
-      <p className="version-line">마음결 v0.2 — 로컬 프로토타입</p>
+      <p className="version-line">
+        마음결 v0.2 ·{' '}
+        <a className="policy-link" href="/privacy.html" target="_blank" rel="noopener noreferrer">
+          개인정보처리방침
+        </a>
+      </p>
     </div>
   )
 }

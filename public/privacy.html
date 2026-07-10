@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>개인정보처리방침 — 마음결</title>
+<link rel="icon" type="image/svg+xml" href="/icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #faf6f0; --card: #fff; --ink: #352e28; --soft: #5c5347;
+    --muted: #8a7e71; --line: #eae0d3; --accent: #9c5b43; --accent-deep: #7a4232;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    font-family: 'Gowun Batang', 'Apple SD Gothic Neo', serif;
+    background: var(--bg); color: var(--ink); line-height: 1.8;
+    padding: 32px 20px 60px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin-bottom: 4px; }
+  .date { color: var(--muted); font-size: 0.82rem; margin-bottom: 28px; }
+  h2 {
+    font-size: 1.05rem; color: var(--accent-deep);
+    margin: 30px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line);
+  }
+  p, li { font-size: 0.93rem; color: var(--soft); }
+  ul { padding-left: 20px; }
+  li { margin: 6px 0; }
+  strong { color: var(--ink); }
+  .highlight {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 18px; margin: 14px 0;
+  }
+  .back {
+    display: inline-block; margin-top: 36px; color: var(--accent);
+    font-weight: 700; text-decoration: none; font-size: 0.9rem;
+  }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>개인정보처리방침</h1>
+  <p class="date">시행일: 2026년 7월 10일 · 마음결 (관계 조율 노트)</p>
+
+  <div class="highlight">
+    <p><strong>한 줄 요약:</strong> 마음결은 서버가 없는 앱입니다. 회원가입이 없고, 운영자는 이용자의
+    어떤 기록도 수집하거나 볼 수 없습니다. 모든 데이터는 이용자의 기기 안에, 그리고 이용자가 원할
+    경우 이용자 본인의 Google Drive에만 저장됩니다.</p>
+  </div>
+
+  <h2>1. 수집하는 개인정보</h2>
+  <p>마음결은 개인정보를 <strong>수집하지 않습니다.</strong></p>
+  <ul>
+    <li>회원가입, 로그인, 이름·연락처 입력이 없습니다.</li>
+    <li>작성한 모든 기록(감정 기록, 회고, 약속, 체크인)은 이용자 기기의 브라우저 저장소(localStorage)에만 저장됩니다.</li>
+    <li>운영자의 서버로 전송되는 데이터가 없으며, 운영자는 이용자의 기록에 접근할 수 없습니다.</li>
+    <li>광고·분석 도구(쿠키, 트래커)를 사용하지 않습니다.</li>
+  </ul>
+
+  <h2>2. Google Drive 백업 (선택 기능)</h2>
+  <p>이용자가 직접 "Google Drive 연결하기"를 선택한 경우에만 작동하는 기능입니다.</p>
+  <ul>
+    <li>Google의 공식 인증(OAuth)을 사용하며, 앱은 이용자의 Google 비밀번호를 알 수 없습니다.</li>
+    <li>요청 권한은 <strong>drive.file</strong>(이 앱이 만든 파일에만 접근)로 제한됩니다. 이용자의 다른 드라이브 파일은 읽을 수 없습니다.</li>
+    <li>백업 파일은 <strong>이용자 본인의 Google Drive에만</strong> 저장되며, 운영자는 접근할 수 없습니다.</li>
+    <li>연결된 Google 계정 이메일은 연결 상태 표시 용도로 이용자 기기 안에만 저장됩니다.</li>
+    <li>연결은 설정에서 언제든 해제할 수 있고, 드라이브의 백업 파일은 이용자가 직접 삭제할 수 있습니다.</li>
+    <li>본 앱의 Google 사용자 데이터 활용은 <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API 서비스 사용자 데이터 정책</a>(제한적 사용 요건 포함)을 준수합니다.</li>
+  </ul>
+
+  <h2>3. 공유 기능</h2>
+  <ul>
+    <li>기록 공유는 이용자가 항목을 직접 선택했을 때만 이루어집니다.</li>
+    <li>공유 코드는 이용자가 정한 교환 PIN으로 <strong>기기 안에서 암호화</strong>되어 생성되며, 어떤 서버에도 전송·저장되지 않습니다. PIN 없이는 코드를 열 수 없습니다.</li>
+    <li>코드의 전달(메신저 등)은 이용자가 선택한 경로를 통합니다.</li>
+  </ul>
+
+  <h2>4. 데이터의 보관과 삭제</h2>
+  <ul>
+    <li>기록은 이용자가 삭제하기 전까지 이용자 기기에 보관됩니다.</li>
+    <li>설정의 "모든 데이터 삭제"로 즉시, 완전히 삭제할 수 있습니다 (운영자에게 남는 사본 없음).</li>
+    <li>브라우저 데이터 삭제 시 기록이 사라질 수 있으므로 백업 기능 이용을 권장합니다.</li>
+  </ul>
+
+  <h2>5. 제3자 제공</h2>
+  <p>운영자는 이용자의 데이터를 보유하지 않으므로, 제3자에게 제공하거나 판매하는 일 자체가 불가능합니다.</p>
+
+  <h2>6. 아동의 개인정보</h2>
+  <p>마음결은 성인(부부·연인)을 위한 서비스이며, 아동을 대상으로 하지 않고 아동의 개인정보를 수집하지 않습니다.</p>
+
+  <h2>7. 이용 시 유의사항</h2>
+  <p>마음결은 부부상담, 정신건강 진단, 법률 판단, 긴급 구조 서비스를 대체하지 않습니다. 폭력·협박 등
+  안전이 우려되는 상황에서는 기록보다 안전 확보와 전문기관의 도움이 우선입니다.</p>
+
+  <h2>8. 문의</h2>
+  <p>개인정보처리방침에 대한 문의: <a href="mailto:mentogood@gmail.com">mentogood@gmail.com</a></p>
+  <p>본 방침이 변경될 경우 이 페이지를 통해 고지합니다.</p>
+
+  <a class="back" href="/">← 마음결로 돌아가기</a>
+</div>
+</body>
+</html>

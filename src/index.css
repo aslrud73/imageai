@@ -1096,6 +1096,10 @@ textarea {
   color: var(--muted);
   margin-top: 18px;
 }
+.policy-link {
+  color: var(--muted);
+  text-decoration: underline;
+}
 
 /* ── 메인(랜딩) 페이지 ─────────────────── */
 .landing {
