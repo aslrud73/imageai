@@ -1235,6 +1235,88 @@ textarea {
   color: #fdf9f4;
 }
 
+/* ── 공유 코드 ────────────────────────── */
+.code-box {
+  width: 100%;
+  padding: 13px 14px;
+  border: 1.5px solid var(--line);
+  border-radius: 13px;
+  background: var(--card);
+  font-size: 0.72rem;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  word-break: break-all;
+  line-height: 1.6;
+  color: var(--soft-ink);
+  resize: none;
+  outline: none;
+  margin-bottom: 14px;
+}
+.code-box.in {
+  margin-bottom: 0;
+}
+.btn-ghost-mini {
+  padding: 15px 22px;
+  border: 1.5px solid rgba(156, 91, 67, 0.4);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--accent-deep);
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+}
+.both-note {
+  font-style: normal;
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--accent-deep);
+  background: var(--accent-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 4px;
+}
+.who {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-right: 6px;
+  vertical-align: 0.1em;
+}
+.who.me {
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+.who.partner {
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+.received-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.received-item:last-child {
+  border-bottom: none;
+}
+.received-main strong {
+  display: block;
+  font-size: 0.88rem;
+}
+.received-main small {
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.received-line {
+  font-size: 0.82rem;
+  color: var(--soft-ink);
+  margin-top: 3px;
+}
+
 /* ── PIN 잠금 화면 ────────────────────── */
 .pinlock {
   min-height: 100dvh;

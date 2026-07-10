@@ -83,7 +83,7 @@ export default function App() {
               <Home data={data} update={update} onRecord={() => setRecording(true)} goTab={setTab} />
             )}
             {tab === 'logs' && <Logs data={data} update={update} onRecord={() => setRecording(true)} />}
-            {tab === 'patterns' && <Patterns data={data} />}
+            {tab === 'patterns' && <Patterns data={data} update={update} />}
             {tab === 'agreements' && <Agreements data={data} update={update} />}
             {tab === 'settings' && <Settings data={data} setData={setData} />}
           </>

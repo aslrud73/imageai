@@ -8,12 +8,17 @@ export function loadData() {
     if (raw) {
       const d = JSON.parse(raw)
       // 구버전 데이터 마이그레이션: 없는 필드는 기본값으로
-      return { logs: d.logs || [], agreements: d.agreements || [], checkins: d.checkins || [] }
+      return {
+        logs: d.logs || [],
+        agreements: d.agreements || [],
+        checkins: d.checkins || [],
+        received: d.received || [], // 상대가 공유 코드로 보내준 것들
+      }
     }
   } catch {
     /* 손상된 데이터는 초기화 */
   }
-  return { logs: [], agreements: [], checkins: [] }
+  return { logs: [], agreements: [], checkins: [], received: [] }
 }
 
 export function saveData(data) {
@@ -135,9 +140,14 @@ export function parseBackup(text) {
   try {
     const obj = JSON.parse(text)
     if (obj.app !== 'maumgyeol' || !obj.data) return null
-    const { logs, agreements, checkins } = obj.data
+    const { logs, agreements, checkins, received } = obj.data
     if (!Array.isArray(logs) || !Array.isArray(agreements)) return null
-    return { logs, agreements, checkins: Array.isArray(checkins) ? checkins : [] }
+    return {
+      logs,
+      agreements,
+      checkins: Array.isArray(checkins) ? checkins : [],
+      received: Array.isArray(received) ? received : [],
+    }
   } catch {
     return null
   }

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Icon from '../components/Icons'
 import { EMOTION_LABELS, SHARE_FIELDS, fmtDate, daysAgo } from '../store'
+import { encryptToCode } from '../api/shareCrypto'
 
 // 내 기록 목록 + 회고 작성 + 공유 선택.
 // 원칙: 본인 기록은 본인만 수정·삭제, 공유는 미리보기를 거친 선택 행위.
@@ -149,18 +150,23 @@ export default function Logs({ data, update, onRecord }) {
                     <Icon name="share" size={14} /> 공유 선택
                   </button>
                 ) : (
-                  <button
-                    className="small-btn"
-                    onClick={() =>
-                      update((d) => {
-                        const t = d.logs.find((x) => x.id === l.id)
-                        t.share = null
-                        return d
-                      })
-                    }
-                  >
-                    <Icon name="x" size={14} /> 공유 철회
-                  </button>
+                  <>
+                    <button className="small-btn accent" onClick={() => setMode('share')}>
+                      <Icon name="share" size={14} /> 공유 코드
+                    </button>
+                    <button
+                      className="small-btn"
+                      onClick={() =>
+                        update((d) => {
+                          const t = d.logs.find((x) => x.id === l.id)
+                          t.share = null
+                          return d
+                        })
+                      }
+                    >
+                      <Icon name="x" size={14} /> 철회
+                    </button>
+                  </>
                 )}
                 <button
                   className="small-btn danger"
@@ -260,19 +266,94 @@ function ReflectForm({ log, update, onDone, onCancel }) {
   )
 }
 
-// ── 공유 선택 + 미리보기 ─────────────────────
+// ── 공유 선택 + 미리보기 + 암호화 코드 생성 ────────────
 function ShareSheet({ log, update, onDone }) {
-  const [fields, setFields] = useState({ topics: true, emotion: true, realNeed: false, request: true })
+  const [fields, setFields] = useState(() =>
+    log.share
+      ? { topics: !!log.share.topics, emotion: !!log.share.emotion, realNeed: !!log.share.realNeed, request: !!log.share.request }
+      : { topics: true, emotion: true, realNeed: false, request: true },
+  )
+  const [pin, setPin] = useState('')
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [error, setError] = useState('')
 
   const anyOn = Object.values(fields).some(Boolean)
 
-  function save() {
+  function buildPacket() {
+    const item = { date: log.createdAt.slice(0, 10) }
+    if (fields.topics) item.topics = log.topics
+    if (fields.emotion) item.emotion = log.emotion
+    if (fields.realNeed && log.reflection?.realNeed) item.realNeed = log.reflection.realNeed
+    if (fields.request && log.reflection?.request) item.request = log.reflection.request
+    return { v: 1, kind: 'share', items: [item] }
+  }
+
+  async function shareAndCode() {
+    setError('')
+    if (pin.trim().length < 4) {
+      setError('교환 PIN을 4자리 이상 정해 주세요. (상대와 미리 약속한 번호)')
+      return
+    }
+    setBusy(true)
+    const generated = await encryptToCode(buildPacket(), pin.trim())
+    setBusy(false)
     update((d) => {
       const t = d.logs.find((x) => x.id === log.id)
       t.share = { ...fields, sharedAt: new Date().toISOString() }
       return d
     })
-    onDone()
+    setCode(generated)
+  }
+
+  async function copyCode() {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    } catch {
+      /* 클립보드 미지원 시 직접 선택 복사 */
+    }
+  }
+
+  async function shareCode() {
+    try {
+      await navigator.share({ title: '마음결 공유 코드', text: code })
+    } catch {
+      copyCode()
+    }
+  }
+
+  // 코드 생성 완료 화면
+  if (code) {
+    return (
+      <div className="page">
+        <header className="form-head">
+          <button className="icon-btn" onClick={onDone} aria-label="완료">
+            <Icon name="chevronLeft" size={20} />
+          </button>
+          <h1>공유 코드</h1>
+        </header>
+        <p className="form-guide">
+          이 코드를 카톡·문자로 상대에게 보내세요. 상대는 <strong>우리 패턴 → 공유 받기</strong>에서
+          코드와 교환 PIN을 입력하면 볼 수 있어요.
+        </p>
+        <textarea className="code-box" readOnly value={code} rows={5} onFocus={(e) => e.target.select()} />
+        <div className="actions">
+          <button className="btn-primary" onClick={shareCode}>
+            <Icon name="share" size={16} /> 보내기
+          </button>
+          <button className="btn-ghost-mini" onClick={copyCode}>
+            {copied ? '복사됨' : '복사'}
+          </button>
+        </div>
+        <p className="section-hint center">
+          코드는 교환 PIN 없이는 열 수 없게 암호화되어 있어요. PIN은 코드와 다른 경로로 전하거나 미리
+          약속해 두세요.
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -322,8 +403,23 @@ function ShareSheet({ log, update, onDone }) {
         )}
       </section>
 
-      <button className="btn-primary" disabled={!anyOn} onClick={save}>
-        이 내용만 공유하기
+      <section className="field">
+        <label>교환 PIN <small>(상대와 약속한 번호 — 잠금 PIN과 달라도 돼요)</small></label>
+        <input
+          type="text"
+          inputMode="numeric"
+          className="etc-input"
+          style={{ marginTop: 0 }}
+          value={pin}
+          onChange={(e) => setPin(e.target.value)}
+          placeholder="4자리 이상"
+        />
+      </section>
+
+      {error && <p className="error">{error}</p>}
+
+      <button className="btn-primary" disabled={!anyOn || busy} onClick={shareAndCode}>
+        {busy ? '코드 만드는 중…' : '공유 코드 만들기'}
       </button>
       <p className="section-hint center">공유한 뒤에도 언제든 철회할 수 있어요.</p>
     </div>

@@ -9,10 +9,13 @@ import {
   setPin,
   removePin,
   todayKey,
+  newId,
 } from '../store'
+import { encryptToCode, decryptFromCode } from '../api/shareCrypto'
 
 export default function Settings({ data, setData }) {
   const fileRef = useRef(null)
+  const fullRef = useRef(null)
   const [pinOn, setPinOn] = useState(!!getPinHash())
   const [pinStep, setPinStep] = useState(null) // null | 'new' | 'confirm'
   const [pin1, setPin1] = useState('')
@@ -79,6 +82,56 @@ export default function Settings({ data, setData }) {
       setPin1('')
       setPin2('')
     }
+  }
+
+  // ── 전체 기록 전달: 메모까지 포함해 암호화 파일로 ────
+  async function exportFullForPartner() {
+    if (
+      !confirm(
+        '전체 전달에는 비공개 메모를 포함한 모든 기록 내용이 담겨요.\n\n선택 공유와 달리 전부 보이게 됩니다. 계속할까요?',
+      )
+    )
+      return
+    const pin = prompt('교환 PIN을 정해 주세요 (4자리 이상, 상대와 약속한 번호)')
+    if (!pin || pin.trim().length < 4) {
+      if (pin !== null) alert('PIN은 4자리 이상이어야 해요.')
+      return
+    }
+    const code = await encryptToCode({ v: 1, kind: 'full', logs: data.logs }, pin.trim())
+    const blob = new Blob([code], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `마음결_전체공유_${todayKey()}.mgshare`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  function importFullFromPartner(e) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = async () => {
+      const pin = prompt('상대와 약속한 교환 PIN을 입력해 주세요')
+      if (!pin) return
+      const packet = await decryptFromCode(String(reader.result), pin.trim())
+      if (!packet || packet.kind !== 'full' || !Array.isArray(packet.logs)) {
+        alert('파일이나 PIN이 맞지 않아요.')
+        return
+      }
+      setData({
+        ...data,
+        received: [
+          ...(data.received || []),
+          { id: newId('rcv'), receivedAt: new Date().toISOString(), kind: 'full', logs: packet.logs },
+        ],
+      })
+      alert(`상대의 기록 ${packet.logs.length}건을 받았어요. "우리 패턴"에서 확인할 수 있어요.`)
+    }
+    reader.readAsText(file)
   }
 
   function turnOffPin() {
@@ -196,6 +249,29 @@ export default function Settings({ data, setData }) {
         </p>
       </div>
 
+      {/* 전체 기록 전달 */}
+      <div className="setting-card">
+        <h3>
+          <Icon name="share" size={16} /> 전체 기록 전달 (상대에게)
+        </h3>
+        <p>
+          내 기록 전체를 <strong>비공개 메모까지 포함해</strong> 상대에게 전할 수 있어요. 교환 PIN으로
+          암호화된 파일이 만들어지며, 카톡·메일 등으로 보내면 상대가 파일과 PIN으로 열어요.
+        </p>
+        <div className="setting-actions">
+          <button className="small-btn accent" onClick={exportFullForPartner}>
+            <Icon name="share" size={14} /> 전체 전달 파일 만들기
+          </button>
+          <button className="small-btn" onClick={() => fullRef.current?.click()}>
+            <Icon name="upload" size={14} /> 상대의 전체 기록 열기
+          </button>
+          <input ref={fullRef} type="file" accept=".mgshare,text/plain" hidden onChange={importFullFromPartner} />
+        </div>
+        <p className="setting-note">
+          선택 공유와 달리 모든 내용이 보이게 되는 방식이에요. 신중하게, 준비가 되었을 때 사용하세요.
+        </p>
+      </div>
+
       <div className="setting-card">
         <h3>
           <Icon name="heart" size={16} /> 마음결은
@@ -204,16 +280,6 @@ export default function Settings({ data, setData }) {
           함께 쓰는 싸움 기록장이 아니라, <strong>각자 쓰고 필요한 만큼만 공유하는 관계 조율
           노트</strong>예요. 기록의 목적은 잘잘못을 가리는 것이 아니라, 반복되는 패턴을 확인하고 다음
           대화를 준비하는 것입니다.
-        </p>
-      </div>
-
-      <div className="setting-card">
-        <h3>
-          <Icon name="share" size={16} /> 커플 연결
-        </h3>
-        <p>
-          각자의 계정을 연결코드로 잇고, 선택 공유한 내용만 함께 보는 기능은 다음 버전에서 제공될
-          예정이에요.
         </p>
       </div>
 
