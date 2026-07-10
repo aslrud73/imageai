@@ -21,6 +21,24 @@ import {
   disconnectDrive,
 } from '../api/googleDrive'
 
+// 접을 수 있는 설정 섹션 (아코디언)
+function Section({ icon, title, warn = false, defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className={`setting-card ${warn ? 'warn' : ''}`}>
+      <button type="button" className="setting-head" onClick={() => setOpen(!open)}>
+        <h3>
+          <Icon name={icon} size={16} /> {title}
+        </h3>
+        <span className={`expand-arrow ${open ? 'up' : ''}`}>
+          <Icon name="chevronRight" size={15} />
+        </span>
+      </button>
+      {open && <div className="setting-body">{children}</div>}
+    </div>
+  )
+}
+
 export default function Settings({ data, setData }) {
   const fileRef = useRef(null)
   const fullRef = useRef(null)
@@ -219,10 +237,7 @@ export default function Settings({ data, setData }) {
       </header>
 
       {/* 기록 잠금 */}
-      <div className="setting-card">
-        <h3>
-          <Icon name="key" size={16} /> 기록 잠금 (PIN)
-        </h3>
+      <Section icon="key" title="기록 잠금 (PIN)" defaultOpen={!pinOn}>
         {pinOn ? (
           <>
             <p>잠금이 켜져 있어요. 앱을 새로 열 때마다 PIN 4자리를 물어봐요.</p>
@@ -294,13 +309,10 @@ export default function Settings({ data, setData }) {
             PIN을 잊으면 복구할 수 없어요 (모든 데이터 삭제로만 초기화). 잊지 않을 번호로 정해 주세요.
           </p>
         )}
-      </div>
+      </Section>
 
       {/* 백업 / 복원 */}
-      <div className="setting-card">
-        <h3>
-          <Icon name="download" size={16} /> 백업 / 복원
-        </h3>
+      <Section icon="download" title="백업 / 복원">
         <p>
           기록은 이 기기 안에만 있어서, 브라우저 데이터가 지워지면 사라져요. 가끔 파일로 백업해
           두세요.
@@ -318,13 +330,10 @@ export default function Settings({ data, setData }) {
           현재 기록 {data.logs.length}건 · 약속 {data.agreements.length}개 · 체크인{' '}
           {(data.checkins || []).length}일
         </p>
-      </div>
+      </Section>
 
       {/* Google Drive 자동 백업 */}
-      <div className="setting-card">
-        <h3>
-          <Icon name="cloud" size={16} /> Google Drive 자동 백업
-        </h3>
+      <Section icon="cloud" title="Google Drive 자동 백업">
         {!isDriveConfigured() ? (
           <p>
             내 구글 드라이브에 자동으로 백업하는 기능이에요. <strong>준비 중</strong> — 관리자가 구글
@@ -374,13 +383,10 @@ export default function Settings({ data, setData }) {
             </p>
           </>
         )}
-      </div>
+      </Section>
 
       {/* 전체 기록 전달 */}
-      <div className="setting-card">
-        <h3>
-          <Icon name="share" size={16} /> 전체 기록 전달 (상대에게)
-        </h3>
+      <Section icon="share" title="전체 기록 전달 (상대에게)">
         <p>
           내 기록 전체를 <strong>비공개 메모까지 포함해</strong> 상대에게 전할 수 있어요. 교환 PIN으로
           암호화된 파일이 만들어지며, 카톡·메일 등으로 보내면 상대가 파일과 PIN으로 열어요.
@@ -397,29 +403,23 @@ export default function Settings({ data, setData }) {
         <p className="setting-note">
           선택 공유와 달리 모든 내용이 보이게 되는 방식이에요. 신중하게, 준비가 되었을 때 사용하세요.
         </p>
-      </div>
+      </Section>
 
-      <div className="setting-card">
-        <h3>
-          <Icon name="heart" size={16} /> 마음결은
-        </h3>
+      <Section icon="heart" title="마음결은">
         <p>
           함께 쓰는 싸움 기록장이 아니라, <strong>각자 쓰고 필요한 만큼만 공유하는 관계 조율
           노트</strong>예요. 기록의 목적은 잘잘못을 가리는 것이 아니라, 반복되는 패턴을 확인하고 다음
           대화를 준비하는 것입니다.
         </p>
-      </div>
+      </Section>
 
-      <div className="setting-card warn">
-        <h3>
-          <Icon name="alert" size={16} /> 안전 안내
-        </h3>
+      <Section icon="alert" title="안전 안내" warn>
         <p>
           이 앱은 부부상담, 정신건강 진단, 법률 판단, 긴급 구조 서비스를 대체하지 않습니다. 폭력,
           협박, 감금, 반복적인 공포감이 있는 경우에는 앱 기록보다 안전 확보와 전문기관의 도움 요청이
           우선입니다.
         </p>
-      </div>
+      </Section>
 
       <button
         className="danger-btn"

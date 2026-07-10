@@ -1054,8 +1054,8 @@ textarea {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 15px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
 }
 .setting-card h3 {
   font-size: 0.9rem;
@@ -1063,7 +1063,28 @@ textarea {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 8px;
+}
+.setting-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: none;
+  background: transparent;
+  padding: 2px 0;
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.setting-body {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.setting-card.warn .setting-body {
+  border-top-color: #e8dcc4;
 }
 .setting-card p {
   font-size: 0.84rem;
@@ -1139,10 +1160,22 @@ textarea {
   color: var(--soft-ink);
   line-height: 1.7;
 }
+.landing-quote {
+  margin-top: 24px;
+  padding: 16px 18px;
+  background: var(--card);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px 14px 14px 4px;
+  font-size: 0.87rem;
+  line-height: 1.9;
+  color: var(--soft-ink);
+  text-align: left;
+  box-shadow: var(--shadow);
+}
 .landing-points {
   list-style: none;
   padding: 0;
-  margin: 34px 0 0;
+  margin: 22px 0 0;
   width: 100%;
   display: flex;
   flex-direction: column;

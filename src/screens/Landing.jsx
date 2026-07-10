@@ -16,6 +16,16 @@ export default function Landing({ onStart }) {
           관계 조율 노트
         </p>
 
+        <p className="landing-quote">
+          마음결은 함께 쓰는 싸움 기록장이 아니에요.
+          <br />
+          <strong>각자 쓰고, 필요한 만큼만 공유하는 노트</strong>입니다.
+          <br />
+          기록의 목적은 잘잘못을 가리는 것이 아니라,
+          <br />
+          반복되는 패턴을 확인하고 다음 대화를 준비하는 것.
+        </p>
+
         <ul className="landing-points">
           <li>
             <span className="point-icon">
