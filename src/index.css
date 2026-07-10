@@ -31,6 +31,9 @@ body {
   color: var(--ink);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  /* 한국어 단어 단위 줄바꿈 (단어가 중간에 찢어지지 않게) + 긴 토큰은 안전하게 강제 줄바꿈 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 button,
@@ -1141,6 +1144,7 @@ textarea {
 .policy-link {
   color: var(--muted);
   text-decoration: underline;
+  white-space: nowrap;
 }
 
 /* ── 메인(랜딩) 페이지 ─────────────────── */
