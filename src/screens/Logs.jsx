@@ -141,12 +141,16 @@ export default function Logs({ data, update, onRecord }) {
               )}
 
               <div className="log-actions">
-                {!l.reflection ? (
+                {!l.reflection && (
                   <button className="small-btn accent" onClick={() => setMode('reflect')}>
                     <Icon name="moon" size={14} /> 회고 쓰기
                   </button>
-                ) : !l.share ? (
-                  <button className="small-btn accent" onClick={() => setMode('share')}>
+                )}
+                {!l.share ? (
+                  <button
+                    className={`small-btn ${l.reflection ? 'accent' : ''}`}
+                    onClick={() => setMode('share')}
+                  >
                     <Icon name="share" size={14} /> 공유 선택
                   </button>
                 ) : (
@@ -375,7 +379,7 @@ function ShareSheet({ log, update, onDone }) {
           <label key={f.key} className={`share-row ${unavailable ? 'disabled' : ''}`}>
             <div>
               <strong>{f.label}</strong>
-              <small>{unavailable ? '회고에 작성된 내용이 없어요' : f.desc}</small>
+              <small>{unavailable ? '회고를 마치면 공유할 수 있어요' : f.desc}</small>
             </div>
             <input
               type="checkbox"
@@ -386,6 +390,13 @@ function ShareSheet({ log, update, onDone }) {
           </label>
         )
       })}
+
+      {!log.reflection && (
+        <p className="section-hint">
+          <Icon name="moon" size={13} /> 하루 뒤 회고를 마치면 "실제 욕구"와 "요청 문장"도 함께 공유할
+          수 있어요.
+        </p>
+      )}
 
       <section className="preview-box">
         <h3>
